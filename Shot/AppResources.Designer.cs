@@ -112,5 +112,83 @@ namespace Shot {
                 return ResourceManager.GetString("RecordingsListTitle", resourceCulture);
             }
         }
+        
+        internal static string DeleteLabel {
+            get {
+                return ResourceManager.GetString("DeleteLabel", resourceCulture);
+            }
+        }
+        
+        internal static string SearchFieldPlaceHolderLabel {
+            get {
+                return ResourceManager.GetString("SearchFieldPlaceHolderLabel", resourceCulture);
+            }
+        }
+        
+        internal static string MoreOptionsLabel {
+            get {
+                return ResourceManager.GetString("MoreOptionsLabel", resourceCulture);
+            }
+        }
+        
+        internal static string SelectLabel {
+            get {
+                return ResourceManager.GetString("SelectLabel", resourceCulture);
+            }
+        }
+        
+        internal static string CancelLabel {
+            get {
+                return ResourceManager.GetString("CancelLabel", resourceCulture);
+            }
+        }
+        
+        internal static string ShareLabel {
+            get {
+                return ResourceManager.GetString("ShareLabel", resourceCulture);
+            }
+        }
+        
+        internal static string OneRecordingCountLabel {
+            get {
+                return ResourceManager.GetString("OneRecordingCountLabel", resourceCulture);
+            }
+        }
+        
+        internal static string SeletedRecordingCountLabel {
+            get {
+                return ResourceManager.GetString("SeletedRecordingCountLabel", resourceCulture);
+            }
+        }
+        
+        internal static string SelectItemsLabel {
+            get {
+                return ResourceManager.GetString("SelectItemsLabel", resourceCulture);
+            }
+        }
+        
+        internal static string OneDeleteConfirmationLabel {
+            get {
+                return ResourceManager.GetString("OneDeleteConfirmationLabel", resourceCulture);
+            }
+        }
+        
+        internal static string DeleteConfirmationLabel {
+            get {
+                return ResourceManager.GetString("DeleteConfirmationLabel", resourceCulture);
+            }
+        }
+        
+        internal static string DeleteCountLabel {
+            get {
+                return ResourceManager.GetString("DeleteCountLabel", resourceCulture);
+            }
+        }
+        
+        internal static string DoneLabel {
+            get {
+                return ResourceManager.GetString("DoneLabel", resourceCulture);
+            }
+        }
     }
 }

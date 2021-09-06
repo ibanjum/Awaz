@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
-using System.Threading.Tasks;
-
+using Shot.ViewModels;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -15,6 +12,25 @@ namespace Shot.Pages
         public RecordingsListPage()
         {
             InitializeComponent();
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            (BindingContext as BaseViewModel).Init();
+        }
+
+        void OnSearchFieldTextChanged(object sender, TextChangedEventArgs e)
+        {
+            var list = (BindingContext as RecordingsListViewModel).Recordings;
+            if (string.IsNullOrEmpty(e.NewTextValue))
+            {
+                recordingsList.ItemsSource = list;
+            }
+            else
+            {
+                recordingsList.ItemsSource = list.Where(x => x.Name.StartsWith(e.NewTextValue));
+            }
         }
     }
 }

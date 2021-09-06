@@ -2,14 +2,31 @@
 <ContentPage
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:Shot.Converters"
     x:Class="Shot.Pages.PlayerPage">
+    <ContentPage.Resources>
+        <converters:DurationConverter x:Key="durationConverter"/>
+    </ContentPage.Resources>
     <ContentPage.Content>
         <StackLayout
+            Spacing="8"
              HorizontalOptions="Center"
              VerticalOptions="CenterAndExpand">
-            <Label
-                Text="{Binding DurationText}"
-                HorizontalTextAlignment="Center"/>
+            <Slider
+                x:Name="PlayerSlider"
+                Maximum="{Binding SliderMaximum}"
+                Value="{Binding CurrentSliderPosition}"
+                DragStartedCommand="{Binding DragStartedCommand}"
+                DragCompletedCommand="{Binding DragCompletedCommand}"/>
+            <StackLayout
+                Orientation="Horizontal">
+                <Label
+                    Text="{Binding CurrentTimeText}"
+                    HorizontalOptions="StartAndExpand"/>
+                <Label
+                    Text="{Binding TotalDurationText}"
+                    HorizontalOptions="EndAndExpand"/>
+            </StackLayout>
             <StackLayout
                 Orientation="Horizontal"
                 Spacing="16">

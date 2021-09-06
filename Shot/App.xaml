@@ -1,8 +1,89 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Application xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
              x:Class="Shot.App">
     <Application.Resources>
 
+        <!-- Common colors -->
+        <Color x:Key="WarningColor">#d11a2a</Color>
+        <Color x:Key="SubTextColor">Gray</Color>
+        <Color x:Key="LinkColor">#3366BB</Color>
+
+        <!-- Light colors -->
+        <Color x:Key="LightPrimaryColor">whitesmoke</Color>
+        <Color x:Key="LightSecondaryColor">White</Color>
+
+        <!-- Dark colors -->
+        <Color x:Key="DarkPrimaryColor">#191919</Color>
+        <Color x:Key="DarkSecondaryColor">black</Color>
+
+        <Style x:Key="BackGroundPrimary"
+               TargetType="ContentPage">
+            <Setter Property="BackgroundColor"
+                    Value="{AppThemeBinding Light={StaticResource LightPrimaryColor}, Dark={StaticResource DarkPrimaryColor}}" />
+        </Style>
+
+        <Style x:Key="TextStylePrimary"
+               TargetType="Label">
+            <Setter Property="TextColor"
+                    Value="{AppThemeBinding Light={StaticResource DarkPrimaryColor}, Dark={StaticResource LightPrimaryColor}}" />
+            <Setter Property="FontSize" Value="Subtitle"/>
+        </Style>
+
+        <Style x:Key="TextStyleSecondary"
+               TargetType="Label">
+            <Setter Property="TextColor"
+                    Value="{AppThemeBinding Light={StaticResource SubTextColor}, Dark={StaticResource SubTextColor}}" />
+            <Setter Property="FontSize" Value="Body"/>
+        </Style>
+
+        <Style x:Key="TextStyleTitle"
+               TargetType="Label">
+            <Setter Property="TextColor"
+                    Value="{AppThemeBinding Light={StaticResource DarkPrimaryColor}, Dark={StaticResource LightPrimaryColor}}" />
+            <Setter Property="FontSize" Value="Title"/>
+            <Setter Property="FontAttributes" Value="Bold"/>
+        </Style>
+
+        <Style TargetType="ImageButton" x:Key="PauseButton">
+            <Setter
+                Property="Source"
+                Value="{AppThemeBinding Light=pause_icon.png, Dark=pause_icon.png}"/>
+        </Style>
+
+
+        <Style TargetType="ImageButton" x:Key="RecordButton">
+            <Setter
+                Property="Source"
+                Value="{AppThemeBinding Light=record.png, Dark=record.png}"/>
+        </Style>
+
+        <Style TargetType="ListView" x:Key="RecodringsList">
+            <Setter
+                Property="BackgroundColor"
+                 Value="{AppThemeBinding Light={StaticResource LightSecondaryColor}, Dark={StaticResource DarkSecondaryColor}}" />
+            <Setter Property="SeparatorColor"
+                     Value="{StaticResource SubTextColor}" />
+            <Setter Property="HasUnevenRows" Value="True"/>
+            <Setter Property="Margin" Value="16, 0, 16, 0"/>
+        </Style>
+
+        <Style TargetType="SearchBar" x:Key="SearchBar">
+            <Setter
+                Property="PlaceholderColor"
+                  Value="{AppThemeBinding Light={StaticResource SubTextColor}, Dark={StaticResource SubTextColor}}" />
+            <Setter Property="TextColor"
+                  Value="{AppThemeBinding Light={StaticResource DarkPrimaryColor}, Dark={StaticResource LightPrimaryColor}}" />
+            <Setter Property="CancelButtonColor"
+                    Value="{AppThemeBinding Light={StaticResource DarkPrimaryColor}, Dark={StaticResource LightPrimaryColor}}" />
+            <Setter Property="FontSize" Value="Medium"/>
+        </Style>
+
+        <Style TargetType="BoxView" x:Key="BoxView">
+            <Setter Property="HeightRequest" Value="0.5"/>
+            <Setter Property="BackgroundColor"
+                    Value="{StaticResource SubTextColor}"/>
+        </Style>
     </Application.Resources>
 </Application>

@@ -45,4 +45,43 @@
 	<data name="RecordingsListTitle" xml:space="preserve">
 		<value>Recordings</value>
     </data>
+	<data name="DeleteLabel" xml:space="preserve">
+		<value>Delete Recording</value>
+    </data>
+	<data name="SearchFieldPlaceHolderLabel" xml:space="preserve">
+		<value>Search</value>
+    </data>
+	<data name="MoreOptionsLabel" xml:space="preserve">
+		<value>More Options</value>
+    </data>
+	<data name="SelectLabel" xml:space="preserve">
+		<value>Select</value>
+    </data>
+	<data name="CancelLabel" xml:space="preserve">
+		<value>Cancel</value>
+    </data>
+	<data name="ShareLabel" xml:space="preserve">
+		<value>Share</value>
+    </data>
+	<data name="OneRecordingCountLabel" xml:space="preserve">
+		<value>1 Recording Selected</value>
+    </data>
+	<data name="SeletedRecordingCountLabel" xml:space="preserve">
+		<value>{0} Recordings Selected</value>
+    </data>
+	<data name="SelectItemsLabel" xml:space="preserve">
+		<value>Select Items</value>
+    </data>
+	<data name="OneDeleteConfirmationLabel" xml:space="preserve">
+		<value>This recording will be deleted with no backup</value>
+    </data>
+	<data name="DeleteConfirmationLabel" xml:space="preserve">
+		<value>These recordings will be deleted with no backup</value>
+    </data>
+	<data name="DeleteCountLabel" xml:space="preserve">
+		<value>Delete {0} Recordings</value>
+    </data>
+	<data name="DoneLabel" xml:space="preserve">
+		<value>Done</value>
+    </data>
 </root>

@@ -9,6 +9,8 @@ namespace Shot.Services
         void Stop();
         void Pause();
         void Resume();
+        string FilePath { get; set; }
         RecordingStatus Status { get; set; }
+        int? MaxAmplitude { get; }
     }
 }

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Globalization;
 using Android.Media;
+using Ninject;
 using Shot.Enumerations;
 using Shot.Services;
+using Shot.ViewModels;
+using Xamarin.Forms;
 
 [assembly: Xamarin.Forms.Dependency(typeof(Shot.Droid.Services.PlayerService))]
 namespace Shot.Droid.Services
@@ -16,52 +19,65 @@ namespace Shot.Droid.Services
 
         public PlayerService()
         {
-            _player = new MediaPlayer();
-            _player.Reset();
-            _mmr = new MediaMetadataRetriever();
-            Status = RecordingStatus.Stopped;
+
         }
 
         public void Pause()
         {
+            if (_player == null)
+                return;
+
             _player.Pause();
             Status = RecordingStatus.Paused;
         }
 
-        public void Play(string filePath)
+        public void Play()
         {
-            if (!string.IsNullOrEmpty(filePath))
-            {
-                _player.SetDataSource(filePath);
-                _player.Prepare();
-                _player.Start();
-                Status = RecordingStatus.Running;
-            }
-        }
+            if (_player == null)
+                return;
 
-        public void Resume()
-        {
             _player.Start();
             Status = RecordingStatus.Running;
         }
 
-        public string GetDuration(string filePath)
+        public void SeekTo(int msec, bool isRelative)
         {
+            if (_player == null)
+                return;
+
+            if (isRelative)
+            {
+                var newPosition = _player.CurrentPosition + msec;
+                _player.SeekTo(newPosition);
+            }
+            else
+            {
+                _player.SeekTo(msec);
+            }
+        }
+
+        public int GetCurrentPosition()
+        {
+            if (_player == null)
+                return 0;
+
+            return _player.CurrentPosition;
+        }
+
+        public void SetPlayer(string filePath)
+        {
+            _player = new MediaPlayer();
+            _player.SetDataSource(filePath);
+            _player.Prepare();
+            Status = RecordingStatus.Stopped;
+        }
+
+        public int GetMetaDataDuration(string filePath)
+        {
+            _mmr = new MediaMetadataRetriever();
             _mmr.SetDataSource(filePath);
-            var ticks = ushort.Parse(_mmr.ExtractMetadata(MetadataKey.Duration));
-            var timeSpan = TimeSpan.FromMilliseconds(ticks);
-            return timeSpan.ToString(@"hh\:mm\:ss");
-        }
-
-        public void SeekTo(int sec, bool isForward)
-        {
-            var seekTo = isForward ? (_player.CurrentPosition + (1000 * sec)) : (_player.CurrentPosition - (1000 * sec));
-            _player.SeekTo(seekTo);
-        }
-
-        public string GetCurrentPosition()
-        {
-            return TimeSpan.FromMilliseconds(_player.CurrentPosition).ToString(@"hh\:mm\:ss");
+            ushort.TryParse(_mmr.ExtractMetadata(MetadataKey.Duration), out var result);
+            return result;
         }
     }
 }

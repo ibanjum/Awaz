@@ -15,13 +15,14 @@ namespace Shot.Droid.Services
 
         public RecordingService()
         {
-            _recorder = new MediaRecorder();
-            _recorder.SetAudioSource(AudioSource.Mic);
-            _recorder.SetOutputFormat(OutputFormat.ThreeGpp);
-            _recorder.SetAudioEncoder((AudioEncoder.AmrNb));
+
         }
 
         public RecordingStatus Status { get; set; }
+
+        public string FilePath { get; set; }
+
+        public int? MaxAmplitude => _recorder?.MaxAmplitude;
 
         public void Pause()
         {
@@ -43,12 +44,15 @@ namespace Shot.Droid.Services
 
         public void Start(string fileNameForRecording)
         {
-            _recorder.SetOutputFile(fileNameForRecording);
+            if (string.IsNullOrEmpty(fileNameForRecording))
+                return;
+            FilePath = fileNameForRecording;
+            InitRecorder();
+            _recorder.SetOutputFile(FilePath);
             _recorder.Prepare();
             _recorder.Start();
             Status = RecordingStatus.Running;
         }
-
 
         public void Stop()
         {
@@ -60,6 +64,14 @@ namespace Shot.Droid.Services
             _recorder.Release();
             _recorder = null;
             Status = RecordingStatus.Stopped;
+        }
+
+        private void InitRecorder()
+        {
+            _recorder = new MediaRecorder();
+            _recorder.SetAudioSource(AudioSource.Mic);
+            _recorder.SetOutputFormat(OutputFormat.ThreeGpp);
+            _recorder.SetAudioEncoder((AudioEncoder.AmrNb));
         }
     }
 }

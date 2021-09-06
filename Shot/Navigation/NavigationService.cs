@@ -116,6 +116,20 @@ namespace Shot.Navigation
         {
             return await ((App)Application.Current).MainPage.DisplayPromptAsync(popup.Title, popup.Text, popup.ButtonText);
         }
+
+        public async Task<string> DisplayActionSheet(ActionSheetModel actionSheetModel)
+        {
+            if (actionSheetModel.Buttons == null)
+            {
+                return await ((App)Application.Current).MainPage.DisplayActionSheet(
+                    actionSheetModel.Title, actionSheetModel.Cancel, actionSheetModel.Distruction);
+            }
+            else
+            {
+                return await ((App)Application.Current).MainPage.DisplayActionSheet(
+                    actionSheetModel.Title, actionSheetModel.Cancel, actionSheetModel.Distruction, actionSheetModel.Buttons);
+            }
+        }
     }
     public interface INavigationService
     {
@@ -138,5 +152,7 @@ namespace Shot.Navigation
         void RemoveLastView();
 
         void ClearBackStack();
+
+        Task<string> DisplayActionSheet(ActionSheetModel actionSheetModel);
     }
 }

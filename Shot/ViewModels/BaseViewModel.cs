@@ -8,11 +8,13 @@ namespace Shot.ViewModels
 {
     public abstract class BaseViewModel : NotifyPropertyChanged
     {
+        private readonly INavigationService _navService;
+
         protected BaseViewModel(INavigationService navService)
         {
         }
 
-        public Task Init()
+        public virtual Task Init()
         {
             return Task.CompletedTask;
         }
@@ -20,7 +22,7 @@ namespace Shot.ViewModels
 
         public virtual void OnNavigatedTo()
         {
-            // called when view appearing
+
         }
 
         public virtual void NavigateBack()

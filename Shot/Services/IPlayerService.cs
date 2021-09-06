@@ -5,12 +5,12 @@ namespace Shot.Services
 {
     public interface IPlayerService
     {
-        void Play(string filePath);
+        void Play();
         void Pause();
-        void Resume();
-        string GetDuration(string filePath);
         RecordingStatus Status { get; set; }
-        void SeekTo(int sec, bool isForwad);
-        string GetCurrentPosition();
+        void SeekTo(int msec, bool isRelative);
+        int GetCurrentPosition();
+        void SetPlayer(string filePath);
+        int GetMetaDataDuration(string filePath);
     }
 }

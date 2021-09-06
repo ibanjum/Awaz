@@ -15,6 +15,8 @@
     <PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
     <PackageReference Include="Portable.Ninject" Version="3.3.1" />
     <PackageReference Include="Xamarin.Essentials.Interfaces" Version="1.6.1" />
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.XamarinForms" Version="2.0.0-beta.70" />
+    <PackageReference Include="Xamarin.CommunityToolkit" Version="1.2.0" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="DependencyInjection\" />
@@ -29,6 +31,12 @@
     <None Remove="Extensions\" />
     <None Remove="Xamarin.Essentials.Interfaces" />
     <None Remove="Enumerations\" />
+    <None Remove="Converters\" />
+    <None Remove="LiveChartsCore" />
+    <None Remove="LiveChartsCore.SkiaSharpView" />
+    <None Remove="LiveChartsCore.SkiaSharpView.XamarinForms" />
+    <None Remove="SkiaSharp" />
+    <None Remove="Xamarin.CommunityToolkit" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DependencyInjection\" />
@@ -39,6 +47,7 @@
     <Folder Include="Services\" />
     <Folder Include="Extensions\" />
     <Folder Include="Enumerations\" />
+    <Folder Include="Converters\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="AppResources.resx">

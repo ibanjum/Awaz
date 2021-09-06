@@ -1,8 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Input;
+using LiveChartsCore;
+using LiveChartsCore.Kernel.Sketches;
+using LiveChartsCore.SkiaSharpView;
 using Shot.Enumerations;
+using Shot.Extensions;
 using Shot.Models;
 using Shot.Navigation;
 using Shot.Services;
@@ -16,11 +22,9 @@ namespace Shot.ViewModels
         private readonly INavigationService _navigationService;
         private readonly IPermissionsService _permissionsService;
 
-        Stopwatch _stopwatch;
-
         public string Title => AppResources.AppTitle;
         public string RecordingsListText => AppResources.RecordingsListText;
-        public string StopText => AppResources.StopText;
+        public string CompleteRecordingCommandText => AppResources.DoneLabel;
 
         public string RecordingText
         {
@@ -28,7 +32,7 @@ namespace Shot.ViewModels
             set { SetPropertyValue(value); }
         }
 
-        public bool IsStopCommandEnabled
+        public bool IsDoneCommandEnabled
         {
             get { return GetPropertyValue<bool>(); }
             set { SetPropertyValue(value); }
@@ -40,21 +44,40 @@ namespace Shot.ViewModels
             set { SetPropertyValue(value); }
         }
 
+        public ObservableCollection<ISeries> Series
+        {
+            get { return GetPropertyValue<ObservableCollection<ISeries>>(); }
+            set { SetPropertyValue(value); }
+        }
+
+        public IEnumerable<ICartesianAxis> YAxes
+        {
+            get { return GetPropertyValue<IEnumerable<ICartesianAxis>>(); }
+            set { SetPropertyValue(value); }
+        }
+
+        public IEnumerable<ICartesianAxis> XAxes
+        {
+            get { return GetPropertyValue<IEnumerable<ICartesianAxis>>(); }
+            set { SetPropertyValue(value); }
+        }
+
         public RecordingStatus RecordingStatus
         {
             get { return GetPropertyValue(_recordingService.Status); }
             set
             {
                 SetPropertyValue(value);
-                SetRecordButtonText(RecordingStatus);
-                IsStopCommandEnabled = RecordingStatus != RecordingStatus.Stopped;
-                RecordCommand = new Command(OnRecordPressed);
+                IsDoneCommandEnabled = RecordingStatus != RecordingStatus.Stopped || RecordingStatus != RecordingStatus.PrePlaying;
             }
         }
 
-        public ICommand RecordCommand { get; set; }
-        public ICommand RecordingsListCommand => new Command(RecordingsListPressed);
-        public ICommand StopCommand => new Command(OnStopRecordingPressed);
+        public ICommand RecordPauseCommand => new Command(OnPlayPausePressed);
+        public ICommand CompleteRecordingCommand => new Command(OnRecordingDonePressed);
+
+        private readonly ObservableCollection<double> _observableValues;
+        private bool isMediaRecorderOn;
+        Stopwatch _stopwatch;
 
         public RecordingViewModel(
             INavigationService navigationService,
@@ -63,28 +86,29 @@ namespace Shot.ViewModels
             _navigationService = navigationService;
             _permissionsService = permissionsService;
             _recordingService = DependencyService.Get<IRecordingService>();
-            _stopwatch = new Stopwatch();
-            RecordingStatus = RecordingStatus.Stopped;
-            SetRecordingTimer();
+            _observableValues = new ObservableCollection<double>() { 0, 0, 0, 0 };
         }
 
-        private async void OnRecordPressed()
+        public override Task Init()
+        {
+            _observableValues.Clear();
+
+            Series = GraphExtension.CreateGraph(_observableValues);
+            YAxes = new Axis[] { new Axis() { ShowSeparatorLines = false, Labeler = (value) => string.Empty } };
+            XAxes = new Axis[] { new Axis() { Labeler = (value) => string.Empty } };
+
+            _stopwatch = new Stopwatch();
+            isMediaRecorderOn = true;
+            RecordingStatus = _recordingService.Status;
+            SetRecordingTimer();
+
+            return Task.CompletedTask;
+        }
+
+        private async void OnPlayPausePressed()
         {
             switch (_recordingService.Status)
             {
-                case RecordingStatus.Stopped:
-                    var popupModel = new PopupModel(AppResources.SaveRecordingLabel, AppResources.EnterNameLabel, AppResources.SaveLabel);
-                    var fileName = await _navigationService.DisplayPrompt(popupModel);
-                    if (!string.IsNullOrEmpty(fileName))
-                    {
-                        var ifPermissionGranted = await _permissionsService.CheckOrRequestMicrophonePermission();
-                        if (ifPermissionGranted)
-                        {
-                            _recordingService.Start(GetFilePath(fileName));
-                            _stopwatch.Start();
-                        }
-                    }
-                    break;
                 case RecordingStatus.Running:
                     _recordingService.Pause();
                     _stopwatch.Stop();
@@ -93,61 +117,58 @@ namespace Shot.ViewModels
                     _recordingService.Resume();
                     _stopwatch.Start();
                     break;
+                case RecordingStatus.Stopped:
+                    var popupModel = new PopupModel(AppResources.SaveRecordingLabel, AppResources.EnterNameLabel, AppResources.SaveLabel);
+                    var fileName = await _navigationService.DisplayPrompt(popupModel);
+                    if (!string.IsNullOrEmpty(fileName))
+                    {
+                        var ifPermissionGranted = await _permissionsService.CheckOrRequestMicrophonePermission();
+                        if (ifPermissionGranted)
+                        {
+                            _recordingService.Start(FileExtension.GetFilePath(fileName));
+                            _stopwatch.Start();
+                        }
+                    }
+                    break;
             }
 
             RecordingStatus = _recordingService.Status;
         }
 
-        private void OnStopRecordingPressed()
+        private async void OnRecordingDonePressed()
         {
-            if (_recordingService.Status != RecordingStatus.Stopped)
-            {
-                _recordingService.Stop();
-                _stopwatch.Reset();
-            }
             RecordingStatus = _recordingService.Status;
-        }
-
-        private async void RecordingsListPressed(object obj)
-        {
-            await _navigationService.NavigateTo<RecordingsListViewModel>();
+            _recordingService.Pause();
+            _recordingService.Stop();
+            _stopwatch.Reset();
+            Series.Clear();
+            RecordingStatus = _recordingService.Status;
         }
 
         private void SetRecordingTimer()
         {
-            Device.StartTimer(TimeSpan.FromSeconds(1), () =>
+            Device.StartTimer(TimeSpan.FromMilliseconds(400), () =>
             {
-                TimeText = _stopwatch.Elapsed.ToString(@"hh\:mm\:ss");
-                return true;
+                if (isMediaRecorderOn)
+                {
+                    TimeText = _stopwatch.Elapsed.ToString(@"hh\:mm\:ss");
+                    if (RecordingStatus != RecordingStatus.Paused)
+                    {
+                        var amplitude = _recordingService.MaxAmplitude;
+                        if (amplitude != null)
+                        {
+                            var negativeAmplitude = -amplitude;
+                            _observableValues.Add((double)amplitude);
+                            _observableValues.Add((double)negativeAmplitude);
+                        }
+                    }
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             });
-        }
-
-        private string GetFilePath(string fileName)
-        {
-            var trimmedName = fileName.Replace(" ", "-");
-            var filePathDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "recordings");
-            if (!File.Exists(filePathDir))
-            {
-                Directory.CreateDirectory(filePathDir);
-            }
-
-            return Path.Combine(filePathDir, trimmedName + ".3gpp");
-        }
-
-        private void SetRecordButtonText(RecordingStatus status)
-        {
-            switch (status)
-            {
-                case RecordingStatus.Stopped:
-                    RecordingText = AppResources.RecordingStartLabel;
-                    break;
-                case RecordingStatus.Running:
-                    RecordingText = AppResources.RecordingPauseLabel;
-                    break;
-                case RecordingStatus.Paused:
-                    RecordingText = AppResources.RecordingResumeLabel;
-                    break;
-            }
         }
     }
 }

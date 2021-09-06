@@ -2,29 +2,65 @@
 <ContentPage
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    x:Class="Shot.Pages.RecordingPage">
+    xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Xamarin.Forms;assembly=LiveChartsCore.SkiaSharpView.XamarinForms"
+    x:Class="Shot.Pages.RecordingPage"
+    xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
+    Style="{DynamicResource BackGroundPrimary}">
     <ContentPage.Content>
-        <StackLayout>
-            <Button
-                Text="{Binding RecordingsListText}"
-                Command="{Binding RecordingsListCommand}"
-                Margin="16"
-                HorizontalOptions="StartAndExpand"
-                VerticalOptions="StartAndExpand"/>
-            <StackLayout HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" Spacing="4">
-                <StackLayout Orientation="Horizontal" Spacing="8">
-                    <Button
-                        Text="{Binding RecordingText}"
-                        Command="{Binding RecordCommand}"/>
-                    <Button
-                        Text="{Binding StopText}"
-                        Command="{Binding StopCommand}"
-                        IsEnabled="{Binding IsStopCommandEnabled}"/>
+        <StackLayout Spacing="0">
+            <Grid VerticalOptions="FillAndExpand" RowSpacing="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="60*"/>
+                    <RowDefinition Height="1"/>
+                    <RowDefinition Height="40*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100*"/>
+                </Grid.ColumnDefinitions>
+                <lvc:CartesianChart
+                    Series="{Binding Series}"
+                    HorizontalOptions="FillAndExpand"
+                    YAxes="{Binding YAxes}"
+                    XAxes="{Binding XAxes}"
+                    Grid.Row="0"
+                    BackgroundColor="WhiteSmoke">
+                </lvc:CartesianChart>
+                <BoxView Style="{DynamicResource BoxView}" Grid.Row="1"/>
+                <StackLayout
+                    Grid.Row="2"
+                    VerticalOptions="FillAndExpand"
+                    HorizontalOptions="FillAndExpand"
+                     BackgroundColor="{AppThemeBinding Light={StaticResource LightSecondaryColor}, Dark={StaticResource DarkSecondaryColor}}">
+                    <StackLayout Orientation="Horizontal">
+                        <Label
+                            Text="{Binding TimeText}"
+                            HorizontalOptions="EndAndExpand"
+                            VerticalTextAlignment="Center"
+                            HorizontalTextAlignment="End"/>
+                        <Button
+                            Text="{Binding CompleteRecordingCommandText}"
+                            Command="{Binding CompleteRecordingCommand}"
+                            TextColor="{DynamicResource LinkColor}"
+                            BackgroundColor="Transparent"
+                            HorizontalOptions="EndAndExpand"
+                            IsEnabled="{Binding IsDoneCommandEnabled}"/>
+                    </StackLayout>
+                    <ImageButton
+                        HeightRequest="44"
+                        WidthRequest="44"
+                        BackgroundColor="Transparent"
+                        Style="{DynamicResource RecordButton}"
+                        Command="{Binding RecordPauseCommand}">
+                        <ImageButton.Triggers>
+                            <DataTrigger TargetType="ImageButton"
+                                         Binding="{Binding RecordingStatus}"
+                                         Value="Running">
+                                <Setter Property="Style" Value="{DynamicResource PauseButton}"/>
+                            </DataTrigger>
+                        </ImageButton.Triggers>
+                    </ImageButton>
                 </StackLayout>
-                <Label
-                Text="{Binding TimeText}"
-                HorizontalTextAlignment="Center"/>
-            </StackLayout>
+            </Grid>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

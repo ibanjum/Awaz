@@ -1,33 +1,129 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Shot.Pages.RecordingsListPage">
+             x:Class="Shot.Pages.RecordingsListPage"
+             xmlns:converter="clr-namespace:Shot.Converters"
+             xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
+             Style="{DynamicResource BackGroundPrimary}">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="{Binding SelectButtonText}"
+                    Command="{Binding SelectButtonCommand}"/>
+    </ContentPage.ToolbarItems>
+    <ContentPage.Resources>
+        <converter:DurationConverter x:Key="durationConverter"/>
+    </ContentPage.Resources>
+    <NavigationPage.TitleView>
+        <Label
+                    Style="{DynamicResource TextStyleTitle}"
+                    Text="{Binding RecordingsListTitle}"/>
+    </NavigationPage.TitleView>
     <ContentPage.Content>
-        <StackLayout Margin="16">
-            <Label
-                Text="{Binding RecordingsListTitle}"
-                Margin="0, 0, 0, 8"/>
-            <ListView ItemsSource="{Binding Recordings}" HasUnevenRows="True" SelectedItem="{Binding SelectedRecording}">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <ViewCell>
-                            <StackLayout Spacing="8" Margin="0, 8, 0, 8">
-                                <Label
-                                    Text="{Binding Name}"
-                                    HorizontalOptions="StartAndExpand"/>
-                                <StackLayout  Orientation="Horizontal">
-                                    <Label
-                                        Text="{Binding CreationTime}"
-                                        HorizontalOptions="StartAndExpand"/>
-                                    <Label
-                                        Text="{Binding Duration}"
-                                        HorizontalOptions="EndAndExpand"/>
-                                </StackLayout>
-                            </StackLayout>
-                        </ViewCell>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </StackLayout>
+        <Grid>
+
+            <StackLayout Spacing="0" Grid.Row="0">
+                <SearchBar Placeholder="{Binding SearchFieldPlaceHolderText}"
+                       TextChanged="OnSearchFieldTextChanged"
+                       Style="{DynamicResource SearchBar}"/>
+                <BoxView Style="{DynamicResource BoxView}"/>
+                <StackLayout
+                BackgroundColor="{AppThemeBinding Light={StaticResource LightSecondaryColor}, Dark={StaticResource DarkSecondaryColor}}">
+                    <ListView ItemsSource="{Binding Recordings}"
+                      SelectedItem="{Binding SelectedRecording}"
+                      Style="{DynamicResource RecodringsList}"
+                      SelectionMode="None"
+                      x:Name="recordingsList">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <ViewCell>
+                                    <Grid xct:TouchEffect.LongPressCommand="{Binding LongPressCommand}"
+                                  xct:TouchEffect.LongPressCommandParameter="{Binding FilePath}"
+                                  xct:TouchEffect.LongPressDuration="500"
+                                  xct:TouchEffect.Command="{Binding ClickPressCommand}"
+                                  xct:TouchEffect.CommandParameter="{Binding FilePath}">
+                                        <StackLayout Spacing="8" Margin="0, 8, 0, 8">
+                                            <StackLayout Orientation="Horizontal">
+                                                <Label
+                                            Style="{DynamicResource TextStylePrimary}"
+                                            Text="{Binding Name}"
+                                            HorizontalOptions="StartAndExpand"/>
+                                                <CheckBox IsChecked="{Binding IsSelected}" IsVisible="{Binding IsSelected}"/>
+                                            </StackLayout>
+                                            <StackLayout Orientation="Horizontal">
+                                                <Label
+                                                Style="{DynamicResource TextStyleSecondary}"
+                                                Text="{Binding CreationTime}"
+                                                HorizontalOptions="StartAndExpand"/>
+                                                <Label
+                                                Style="{DynamicResource TextStyleSecondary}"
+                                                Text="{Binding Duration, Converter={StaticResource durationConverter}}"
+                                                HorizontalOptions="EndAndExpand"
+                                                Margin="0, 0, 12, 0"/>
+                                            </StackLayout>
+                                        </StackLayout>
+                                    </Grid>
+                                </ViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackLayout>
+                <StackLayout
+                VerticalOptions="EndAndExpand"
+                IsVisible="{Binding IsSectionModeOn}"
+                BackgroundColor="{AppThemeBinding Light={StaticResource LightPrimaryColor}, Dark={StaticResource DarkPrimaryColor}}"
+                Spacing="0">
+                    <BoxView Style="{DynamicResource BoxView}"/>
+                    <StackLayout
+                    Orientation="Horizontal"
+                    Padding="12">
+                        <ImageButton
+                        Source="share_icon.png"
+                        BackgroundColor="Transparent"
+                        HorizontalOptions="StartAndExpand"
+                        HeightRequest="36"
+                        WidthRequest="36"
+                        xct:IconTintColorEffect.TintColor="{DynamicResource SubTextColor}"
+                        Command="{Binding DeleteSelectedRecordingsCommand}">
+                            <ImageButton.Triggers>
+                                <DataTrigger TargetType="ImageButton" Binding ="{Binding IsOptionsEnabled}" Value="True">
+                                    <Setter Property="xct:IconTintColorEffect.TintColor" Value="{DynamicResource LinkColor}"/>
+                                </DataTrigger>
+                            </ImageButton.Triggers>
+                        </ImageButton>
+                        <Label
+                        Text="{Binding SeletedRecordingCountText}"
+                        HorizontalOptions="CenterAndExpand"
+                        VerticalTextAlignment="Center"
+                        FontAttributes="Bold"
+                        Style="{DynamicResource TextStylePrimary}"/>
+                        <ImageButton
+                        Source="delete_icon.png"
+                        BackgroundColor="Transparent"
+                        HorizontalOptions="EndAndExpand"
+                        HeightRequest="36"
+                        WidthRequest="36"
+                        Command="{Binding ShareSelectedRecordingsCommand}"
+                        xct:IconTintColorEffect.TintColor="{DynamicResource SubTextColor}">
+                            <ImageButton.Triggers>
+                                <DataTrigger TargetType="ImageButton" Binding ="{Binding IsOptionsEnabled}" Value="True">
+                                    <Setter Property="xct:IconTintColorEffect.TintColor" Value="{DynamicResource WarningColor}"/>
+                                    <Setter Property="IsEnabled" Value="True"/>
+                                </DataTrigger>
+                            </ImageButton.Triggers>
+                        </ImageButton>
+                    </StackLayout>
+                </StackLayout>
+            </StackLayout>
+            <ImageButton
+                Grid.Row="0"
+                        HorizontalOptions="End"
+                        VerticalOptions="End"
+                        HeightRequest="44"
+                        WidthRequest="44"
+                        Margin="64"
+                        BackgroundColor="Transparent"
+                        Source="record.png"
+                Command="{Binding RecordCommand}"/>
+        </Grid>
+
     </ContentPage.Content>
 </ContentPage>
