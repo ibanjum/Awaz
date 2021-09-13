@@ -3,43 +3,105 @@
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:converters="clr-namespace:Shot.Converters"
-    x:Class="Shot.Pages.PlayerPage">
+    xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
+    x:Class="Shot.Pages.PlayerPage"
+    Title="{Binding Title}"
+    Style="{DynamicResource BackGroundPrimary}">
     <ContentPage.Resources>
         <converters:DurationConverter x:Key="durationConverter"/>
     </ContentPage.Resources>
+    <ContentPage.ToolbarItems>
+        <ToolbarItem
+            Text="{Binding MoreText}"
+            Command="{Binding MoreCommand}"/>
+    </ContentPage.ToolbarItems>
     <ContentPage.Content>
-        <StackLayout
-            Spacing="8"
-             HorizontalOptions="Center"
-             VerticalOptions="CenterAndExpand">
-            <Slider
+        <Grid RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="70*"/>
+                <RowDefinition Height="1"/>
+                <RowDefinition Height="30*"/>
+            </Grid.RowDefinitions>
+            <Grid RowSpacing="0" Grid.Row="0" Margin="32" VerticalOptions="CenterAndExpand">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50*"/>
+                    <ColumnDefinition Width="50*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="44"/>
+                    <RowDefinition Height="44"/>
+                    <RowDefinition Height="44"/>
+                </Grid.RowDefinitions>
+                <Label
+                    Text="{Binding CreationDateText}"
+                    Style="{DynamicResource TextStylePrimary}"
+                    Grid.Row="0" Grid.Column="0"/>
+                <Label
+                    Text="{Binding RecordingSizeText}"
+                    Style="{DynamicResource TextStylePrimary}"
+                    Grid.Row="1" Grid.Column="0"/>
+                <Label
+                    Text="{Binding RecordingFormatText}"
+                    Style="{DynamicResource TextStylePrimary}"
+                    Grid.Row="2" Grid.Column="0"/>
+
+                <Label
+                    Text="{Binding CreationDateValue}"
+                    Style="{DynamicResource TextStyleSecondary}"
+                    Grid.Row="0" Grid.Column="1"
+                    HorizontalTextAlignment="End"/>
+                <Label
+                    Text="{Binding RecordingSizeValue}"
+                    Style="{DynamicResource TextStyleSecondary}"
+                    Grid.Row="1" Grid.Column="1"
+                    HorizontalTextAlignment="End"/>
+                <Label
+                    Text="{Binding RecordingFormatValue}"
+                    Style="{DynamicResource TextStyleSecondary}"
+                    Grid.Row="2" Grid.Column="1"
+                    HorizontalTextAlignment="End"/>
+            </Grid>
+            <BoxView Style="{DynamicResource BoxView}" Grid.Row="1"/>
+            <StackLayout
+                BackgroundColor="{AppThemeBinding Light={StaticResource LightSecondaryColor}, Dark={StaticResource DarkSecondaryColor}}"
+                Grid.Row="2"
+                Padding="32">
+                <Slider
                 x:Name="PlayerSlider"
                 Maximum="{Binding SliderMaximum}"
                 Value="{Binding CurrentSliderPosition}"
                 DragStartedCommand="{Binding DragStartedCommand}"
-                DragCompletedCommand="{Binding DragCompletedCommand}"/>
-            <StackLayout
+                DragCompletedCommand="{Binding DragCompletedCommand}"
+                Style="{DynamicResource PlayerSlider}"/>
+                <StackLayout
                 Orientation="Horizontal">
-                <Label
+                    <Label
                     Text="{Binding CurrentTimeText}"
-                    HorizontalOptions="StartAndExpand"/>
-                <Label
+                    HorizontalOptions="StartAndExpand"
+                    Style="{DynamicResource TextStyleSecondary}"/>
+                    <Label
                     Text="{Binding TotalDurationText}"
-                    HorizontalOptions="EndAndExpand"/>
-            </StackLayout>
-            <StackLayout
+                    HorizontalOptions="EndAndExpand"
+                    Style="{DynamicResource TextStyleSecondary}"/>
+                </StackLayout>
+                <StackLayout
+                    HorizontalOptions="CenterAndExpand"
                 Orientation="Horizontal"
                 Spacing="16">
-                <Button
-                    Text="-5s"
-                    Command="{Binding RewindCommand}"/>
-                <Button
-                    Text="{Binding PlayCommandText}"
-                    Command="{Binding PlayCommand}"/>
-                <Button
-                    Text="+5s"
-                    Command="{Binding ForwardCommand}"/>
+                    <Button
+                    Text="{Binding RewindButtonText}"
+                    Command="{Binding RewindCommand}"
+                    Style="{DynamicResource TextButton}"/>
+                    <ImageButton
+                    Command="{Binding PlayCommand}"
+                    Style="{DynamicResource PlayerPlayPauseButton}"
+                    Source="{Binding PlayPauseImageSource}"/>
+                    <Button
+                    Text="{Binding ForwardButtonText}"
+                    Command="{Binding ForwardCommand}"
+                    Style="{DynamicResource TextButton}"/>
+                </StackLayout>
             </StackLayout>
-        </StackLayout>
+        </Grid>
     </ContentPage.Content>
 </ContentPage>

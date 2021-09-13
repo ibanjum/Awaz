@@ -9,6 +9,8 @@
         <Color x:Key="WarningColor">#d11a2a</Color>
         <Color x:Key="SubTextColor">Gray</Color>
         <Color x:Key="LinkColor">#3366BB</Color>
+        <Color x:Key="RecordColor">#CD0000</Color>
+        <Color x:Key="LightGray">Lightgray</Color>
 
         <!-- Light colors -->
         <Color x:Key="LightPrimaryColor">whitesmoke</Color>
@@ -24,8 +26,15 @@
                     Value="{AppThemeBinding Light={StaticResource LightPrimaryColor}, Dark={StaticResource DarkPrimaryColor}}" />
         </Style>
 
+        <Style x:Key="BackGroundSecondary"
+               TargetType="ContentPage">
+            <Setter Property="BackgroundColor"
+                    Value="{AppThemeBinding Light={StaticResource LightSecondaryColor}, Dark={StaticResource DarkSecondaryColor}}" />
+        </Style>
+
         <Style x:Key="TextStylePrimary"
                TargetType="Label">
+
             <Setter Property="TextColor"
                     Value="{AppThemeBinding Light={StaticResource DarkPrimaryColor}, Dark={StaticResource LightPrimaryColor}}" />
             <Setter Property="FontSize" Value="Subtitle"/>
@@ -48,15 +57,24 @@
 
         <Style TargetType="ImageButton" x:Key="PauseButton">
             <Setter
-                Property="Source"
-                Value="{AppThemeBinding Light=pause_icon.png, Dark=pause_icon.png}"/>
+                Property="Source" Value="pause_icon.png"/>
+            <Setter Property="HeightRequest" Value="56"/>
+            <Setter Property="WidthRequest" Value="56"/>
+            <Setter Property="CornerRadius" Value="28"/>
+            <Setter Property="xct:IconTintColorEffect.TintColor"
+                    Value="{DynamicResource RecordColor}" />
+            <Setter Property="BackgroundColor"
+                     Value="{AppThemeBinding Light={StaticResource LightSecondaryColor}, Dark={StaticResource DarkPrimaryColor}}" />
         </Style>
 
 
         <Style TargetType="ImageButton" x:Key="RecordButton">
-            <Setter
-                Property="Source"
-                Value="{AppThemeBinding Light=record.png, Dark=record.png}"/>
+            <Setter Property="Source" Value="record.png"/>
+            <Setter Property="HeightRequest" Value="56"/>
+            <Setter Property="WidthRequest" Value="56"/>
+            <Setter Property="CornerRadius" Value="28"/>
+            <Setter Property="xct:IconTintColorEffect.TintColor" Value="{StaticResource LightGray}"/>
+            <Setter Property="BackgroundColor" Value="{StaticResource RecordColor}"/>
         </Style>
 
         <Style TargetType="ListView" x:Key="RecodringsList">
@@ -84,6 +102,25 @@
             <Setter Property="HeightRequest" Value="0.5"/>
             <Setter Property="BackgroundColor"
                     Value="{StaticResource SubTextColor}"/>
+        </Style>
+
+        <Style TargetType="Slider" x:Key="PlayerSlider">
+            <Setter Property="ThumbColor" Value="{StaticResource LinkColor}"/>
+        </Style>
+
+        <Style TargetType="Button" x:Key="TextButton">
+            <Setter Property="BackgroundColor" Value="Transparent"/>
+            <Setter Property="TextTransform" Value="None"/>
+            <Setter Property="TextColor"
+                    Value="{StaticResource SubTextColor}"/>
+        </Style>
+
+        <Style TargetType="ImageButton" x:Key="PlayerPlayPauseButton">
+            <Setter Property="HeightRequest" Value="36"/>
+            <Setter Property="WidthRequest" Value="36"/>
+            <Setter Property="BackgroundColor" Value="Transparent"/>
+            <Setter Property="xct:IconTintColorEffect.TintColor"
+                    Value="{AppThemeBinding Light={StaticResource DarkPrimaryColor}, Dark={StaticResource LightPrimaryColor}}"/>
         </Style>
     </Application.Resources>
 </Application>

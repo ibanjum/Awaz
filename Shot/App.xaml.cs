@@ -14,14 +14,16 @@ namespace Shot
         public App()
         {
             InitializeComponent();
-            OSAppTheme currentTheme = Application.Current.RequestedTheme;
+            OSAppTheme currentTheme = Current.RequestedTheme;
             Color barColor = currentTheme == OSAppTheme.Dark ? Color.FromHex("#191919") : Color.WhiteSmoke;
+            Color barTextColor = currentTheme == OSAppTheme.Dark ? Color.WhiteSmoke : Color.FromHex("#191919");
 
-            var recordingPage = new NavigationPage(new RecordingsListPage()) { BarBackgroundColor = barColor };
+            var recordingPage = new NavigationPage(new RecordingsListPage()) { BarBackgroundColor = barColor, BarTextColor = barTextColor };
             var provider = new ProviderRegisterationController(recordingPage.Navigation);
             Kernel = new StandardKernel(provider);
 
             var appNavigationService = Kernel.Get<INavigationService>();
+
             // view and view model mappings
             provider.Map(appNavigationService);
             recordingPage.BindingContext = Kernel.Get<RecordingsListViewModel>();

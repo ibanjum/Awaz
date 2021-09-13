@@ -13,19 +13,26 @@ namespace Shot.Services
             _permissions = permissions;
         }
 
-        public async Task<bool> CheckOrRequestMicrophonePermission()
+        public async Task<bool> CheckOrRequestMicrophoneAndSpeechPermission()
         {
-            var permissionStatus = await _permissions.CheckStatusAsync<Permissions.Microphone>();
-            if (permissionStatus != PermissionStatus.Granted)
+            var microphoneStatus = await _permissions.CheckStatusAsync<Permissions.Microphone>();
+            if (microphoneStatus != PermissionStatus.Granted)
             {
-                permissionStatus = await _permissions.RequestAsync<Permissions.Microphone>();
+                microphoneStatus = await _permissions.RequestAsync<Permissions.Microphone>();
             }
-            return permissionStatus == PermissionStatus.Granted;
+
+            var speechStatus = await _permissions.CheckStatusAsync<Permissions.Speech>();
+
+            if (speechStatus != PermissionStatus.Granted)
+            {
+                speechStatus = await _permissions.RequestAsync<Permissions.Speech>();
+            }
+            return microphoneStatus == PermissionStatus.Granted && speechStatus == PermissionStatus.Granted;
         }
     }
 
     public interface IPermissionsService
     {
-        Task<bool> CheckOrRequestMicrophonePermission();
+        Task<bool> CheckOrRequestMicrophoneAndSpeechPermission();
     }
 }

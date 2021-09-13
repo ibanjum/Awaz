@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using LiveChartsCore;
-using LiveChartsCore.Kernel.Sketches;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
@@ -10,25 +8,36 @@ namespace Shot.Extensions
 {
     public static class GraphExtension
     {
-        public static ObservableCollection<ISeries> CreateGraph(ObservableCollection<double> observableValues)
+        public static ObservableCollection<ISeries> CreateGraph(ObservableCollection<double> observableValues, ObservableCollection<double> negavtiveObservableValues)
         {
             return new ObservableCollection<ISeries>()
             {
-                new LineSeries<double>
-                {
-                    Values = observableValues,
-                    Fill = null,
-                    Pivot = 0,
-                    LineSmoothness = 0.3,
-                    GeometrySize = 0,
-                    Stroke = new SolidColorPaint
-                    {
-                        Color = SKColors.DarkRed,
-                        StrokeCap = SKStrokeCap.Round,
-                        StrokeThickness = 6
-                    },
+                GetColumnSeries(observableValues),
+                GetColumnSeries(negavtiveObservableValues)
+            };
+        }
 
-                }
+        public static ColumnSeries<double> GetColumnSeries(ObservableCollection<double> values)
+        {
+            return new ColumnSeries<double>
+            {
+                Values = values,
+                Fill = new SolidColorPaint
+                {
+                    Color = SKColors.DarkRed,
+                    StrokeCap = SKStrokeCap.Round,
+                    StrokeThickness = 6
+                },
+                Pivot = 0,
+                Stroke = new SolidColorPaint
+                {
+                    Color = SKColors.DarkRed,
+                    StrokeCap = SKStrokeCap.Round,
+                    StrokeThickness = 6
+                },
+                IgnoresBarPosition = true,
+                GroupPadding = 0,
+                MaxBarWidth = 2
             };
         }
     }

@@ -10,47 +10,51 @@
         <StackLayout Spacing="0">
             <Grid VerticalOptions="FillAndExpand" RowSpacing="0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="60*"/>
+                    <RowDefinition Height="70*"/>
                     <RowDefinition Height="1"/>
-                    <RowDefinition Height="40*"/>
+                    <RowDefinition Height="30*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="100*"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <lvc:CartesianChart
-                    Series="{Binding Series}"
-                    HorizontalOptions="FillAndExpand"
-                    YAxes="{Binding YAxes}"
-                    XAxes="{Binding XAxes}"
-                    Grid.Row="0"
-                    BackgroundColor="WhiteSmoke">
+                            Series="{Binding Series}"
+                            HorizontalOptions="FillAndExpand"
+                            YAxes="{Binding YAxes}"
+                            XAxes="{Binding XAxes}"
+                            Grid.Row="0">
                 </lvc:CartesianChart>
                 <BoxView Style="{DynamicResource BoxView}" Grid.Row="1"/>
                 <StackLayout
                     Grid.Row="2"
+                    Spacing="16"
                     VerticalOptions="FillAndExpand"
-                    HorizontalOptions="FillAndExpand"
                      BackgroundColor="{AppThemeBinding Light={StaticResource LightSecondaryColor}, Dark={StaticResource DarkSecondaryColor}}">
-                    <StackLayout Orientation="Horizontal">
+                    <Grid Margin="0, 8, 0, 8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="33*"/>
+                            <ColumnDefinition Width="33*"/>
+                            <ColumnDefinition Width="33*"/>
+                        </Grid.ColumnDefinitions>
                         <Label
                             Text="{Binding TimeText}"
-                            HorizontalOptions="EndAndExpand"
+                            Style="{DynamicResource TextStylePrimary}"
                             VerticalTextAlignment="Center"
-                            HorizontalTextAlignment="End"/>
+                            HorizontalTextAlignment="Center"
+                            Grid.Column="1"/>
                         <Button
                             Text="{Binding CompleteRecordingCommandText}"
                             Command="{Binding CompleteRecordingCommand}"
                             TextColor="{DynamicResource LinkColor}"
                             BackgroundColor="Transparent"
-                            HorizontalOptions="EndAndExpand"
-                            IsEnabled="{Binding IsDoneCommandEnabled}"/>
-                    </StackLayout>
+                            HorizontalOptions="End"
+                            IsVisible="{Binding IsDoneCommandEnabled}"
+                            Grid.Column="2"/>
+                    </Grid>
                     <ImageButton
-                        HeightRequest="44"
-                        WidthRequest="44"
-                        BackgroundColor="Transparent"
                         Style="{DynamicResource RecordButton}"
-                        Command="{Binding RecordPauseCommand}">
+                        Command="{Binding RecordPauseCommand}"
+                        HorizontalOptions="CenterAndExpand">
                         <ImageButton.Triggers>
                             <DataTrigger TargetType="ImageButton"
                                          Binding="{Binding RecordingStatus}"

@@ -4,7 +4,6 @@
     {
         Stopped,
         Running,
-        Paused,
-        PrePlaying
+        Paused
     }
 }

@@ -90,10 +90,12 @@ namespace Shot.ViewModels
             {
                 Recordings.Add(new RecordingCellModel()
                 {
-                    Name = GetEnteredName(filePath),
+                    Name = FileExtension.GetEnteredName(filePath),
                     FilePath = filePath,
-                    CreationTime = MediaExtension.GetCreationTime(filePath),
+                    CreationTime = FileExtension.GetCreationTime(filePath),
                     Duration = _playerService.GetMetaDataDuration(filePath),
+                    FileSize = FileExtension.GetFileSize(filePath),
+                    FileFormat = FileExtension.GetFileExtension(filePath),
                     LongPressCommand = new Command(OnLongPressed),
                     ClickPressCommand = new Command(OnClickPressed)
                 });
@@ -117,7 +119,7 @@ namespace Shot.ViewModels
             var filePath = obj as string;
             var cell = Recordings.FirstOrDefault(cm => cm.FilePath == filePath);
             cell.IsSelected = true;
-            var selectedButton = await _navigationService.DisplayActionSheet(GetSelectedRecordingActionSheetModel(filePath));
+            var selectedButton = await _navigationService.DisplayActionSheet(ActionSheetExtension.GetSelectedRecordingActionSheetModel(filePath));
 
             if (selectedButton == AppResources.DeleteLabel)
             {
@@ -125,7 +127,7 @@ namespace Shot.ViewModels
             }
             else if (selectedButton == AppResources.ShareLabel)
             {
-                await ShareSingleFile(filePath);
+                await ActionSheetExtension.ShareSingleFile(filePath);
             }
             cell.IsSelected = false;
         }
@@ -136,17 +138,7 @@ namespace Shot.ViewModels
             var cell = list.FirstOrDefault(cm => cm.FilePath == filePath);
             list.Remove(cell);
             Recordings = new ObservableCollection<RecordingCellModel>(list);
-            File.Delete(filePath);
-        }
-
-        private string GetEnteredName(string filePath)
-        {
-            var fileName = Path.GetFileName(filePath);
-            var split = fileName.Split('.');
-            var val = split[0].Replace("-", " ");
-            char[] letters = val.ToCharArray();
-            letters[0] = char.ToUpper(letters[0]);
-            return new string(letters);
+            FileExtension.DeleteFile(filePath);
         }
 
         private async void OnDeleteSelectedRecordinsPressed()
@@ -154,11 +146,18 @@ namespace Shot.ViewModels
             if (IsOptionsEnabled)
             {
                 var count = Recordings.Where(cm => cm.IsSelected == true).Count();
-                var selectedButton = await _navigationService.DisplayActionSheet(GetDeleteConfirmationActionSheet(count));
+                var selectedButton = await _navigationService.DisplayActionSheet(ActionSheetExtension.GetDeleteConfirmationActionSheet(count));
                 if (!string.IsNullOrEmpty(selectedButton) && selectedButton != AppResources.CancelLabel)
                 {
                     var list = Recordings.ToList();
-                    list.RemoveAll(cm => cm.IsSelected == true);
+                    foreach (var recording in Recordings)
+                    {
+                        if (recording.IsSelected)
+                        {
+                            list.Remove(recording);
+                            FileExtension.DeleteFile(recording.FilePath);
+                        }
+                    }
                     Recordings = new ObservableCollection<RecordingCellModel>(list);
                     IsSectionModeOn = false;
                     IsOptionsEnabled = false;
@@ -187,15 +186,6 @@ namespace Shot.ViewModels
                     Files = files
                 });
             }
-        }
-
-        private async Task ShareSingleFile(string filePath)
-        {
-            await Share.RequestAsync(new ShareFileRequest
-            {
-                Title = string.Format(AppResources.SeletedRecordingCountLabel, 1),
-                File = new ShareFile(filePath)
-            });
         }
 
         private async void OnClickPressed(object obj)
@@ -228,44 +218,8 @@ namespace Shot.ViewModels
             }
             else
             {
-                //await _navigationService.NavigateTo<PlayerViewModel, RecordingCellModel>(cell);
+                await _navigationService.NavigateTo<PlayerViewModel, RecordingCellModel>(cell);
             }
-        }
-
-        private ActionSheetModel GetSelectedRecordingActionSheetModel(string filePath)
-        {
-            return new ActionSheetModel()
-            {
-                Title = GetEnteredName(filePath),
-                Cancel = AppResources.CancelLabel,
-                Distruction = AppResources.DeleteLabel,
-                Buttons = new string[] { AppResources.ShareLabel }
-            };
-        }
-
-        private ActionSheetModel GetDeleteConfirmationActionSheet(int count)
-        {
-            string title = string.Empty;
-            string deleteText = string.Empty;
-            switch (count)
-            {
-                case 0:
-                    break;
-                case 1:
-                    title = AppResources.OneDeleteConfirmationLabel;
-                    deleteText = AppResources.DeleteLabel;
-                    break;
-                default:
-                    title = AppResources.DeleteConfirmationLabel;
-                    deleteText = string.Format(AppResources.DeleteCountLabel, count);
-                    break;
-            }
-            return new ActionSheetModel()
-            {
-                Title = title,
-                Cancel = AppResources.CancelLabel,
-                Distruction = deleteText
-            };
         }
     }
 }

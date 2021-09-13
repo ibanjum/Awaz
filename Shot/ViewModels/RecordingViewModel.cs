@@ -68,7 +68,7 @@ namespace Shot.ViewModels
             set
             {
                 SetPropertyValue(value);
-                IsDoneCommandEnabled = RecordingStatus != RecordingStatus.Stopped || RecordingStatus != RecordingStatus.PrePlaying;
+                IsDoneCommandEnabled = RecordingStatus != RecordingStatus.Stopped;
             }
         }
 
@@ -76,6 +76,7 @@ namespace Shot.ViewModels
         public ICommand CompleteRecordingCommand => new Command(OnRecordingDonePressed);
 
         private readonly ObservableCollection<double> _observableValues;
+        private readonly ObservableCollection<double> _negativeObservableValues;
         private bool isMediaRecorderOn;
         Stopwatch _stopwatch;
 
@@ -86,14 +87,15 @@ namespace Shot.ViewModels
             _navigationService = navigationService;
             _permissionsService = permissionsService;
             _recordingService = DependencyService.Get<IRecordingService>();
-            _observableValues = new ObservableCollection<double>() { 0, 0, 0, 0 };
+            _observableValues = new ObservableCollection<double>();
+            _negativeObservableValues = new ObservableCollection<double>();
         }
 
         public override Task Init()
         {
             _observableValues.Clear();
 
-            Series = GraphExtension.CreateGraph(_observableValues);
+            Series = GraphExtension.CreateGraph(_observableValues, _negativeObservableValues);
             YAxes = new Axis[] { new Axis() { ShowSeparatorLines = false, Labeler = (value) => string.Empty } };
             XAxes = new Axis[] { new Axis() { Labeler = (value) => string.Empty } };
 
@@ -122,7 +124,7 @@ namespace Shot.ViewModels
                     var fileName = await _navigationService.DisplayPrompt(popupModel);
                     if (!string.IsNullOrEmpty(fileName))
                     {
-                        var ifPermissionGranted = await _permissionsService.CheckOrRequestMicrophonePermission();
+                        var ifPermissionGranted = await _permissionsService.CheckOrRequestMicrophoneAndSpeechPermission();
                         if (ifPermissionGranted)
                         {
                             _recordingService.Start(FileExtension.GetFilePath(fileName));
@@ -135,7 +137,7 @@ namespace Shot.ViewModels
             RecordingStatus = _recordingService.Status;
         }
 
-        private async void OnRecordingDonePressed()
+        private void OnRecordingDonePressed()
         {
             RecordingStatus = _recordingService.Status;
             _recordingService.Pause();
@@ -159,7 +161,7 @@ namespace Shot.ViewModels
                         {
                             var negativeAmplitude = -amplitude;
                             _observableValues.Add((double)amplitude);
-                            _observableValues.Add((double)negativeAmplitude);
+                            _negativeObservableValues.Add((double)negativeAmplitude);
                         }
                     }
                     return true;

@@ -114,15 +114,12 @@
                 </StackLayout>
             </StackLayout>
             <ImageButton
-                Grid.Row="0"
+                       Grid.Row="0"
+                        Margin="64"
                         HorizontalOptions="End"
                         VerticalOptions="End"
-                        HeightRequest="44"
-                        WidthRequest="44"
-                        Margin="64"
-                        BackgroundColor="Transparent"
-                        Source="record.png"
-                Command="{Binding RecordCommand}"/>
+                        Style="{DynamicResource RecordButton}"
+                        Command="{Binding RecordCommand}"/>
         </Grid>
 
     </ContentPage.Content>

@@ -190,5 +190,35 @@ namespace Shot {
                 return ResourceManager.GetString("DoneLabel", resourceCulture);
             }
         }
+        
+        internal static string TenSecButtonLabel {
+            get {
+                return ResourceManager.GetString("TenSecButtonLabel", resourceCulture);
+            }
+        }
+        
+        internal static string RecordingFormatLabel {
+            get {
+                return ResourceManager.GetString("RecordingFormatLabel", resourceCulture);
+            }
+        }
+        
+        internal static string CreationDateLabel {
+            get {
+                return ResourceManager.GetString("CreationDateLabel", resourceCulture);
+            }
+        }
+        
+        internal static string RecorindSizeLabel {
+            get {
+                return ResourceManager.GetString("RecorindSizeLabel", resourceCulture);
+            }
+        }
+        
+        internal static string MoreLabel {
+            get {
+                return ResourceManager.GetString("MoreLabel", resourceCulture);
+            }
+        }
     }
 }
