@@ -4,6 +4,8 @@ using LiveChartsCore.SkiaSharpView.Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Xamarin.Forms;
 using Shot.ViewModels;
+using Shot.Enumerations;
+using Shot.Extensions;
 
 namespace Shot.Pages
 {
@@ -12,12 +14,6 @@ namespace Shot.Pages
         public RecordingPage()
         {
             InitializeComponent();
-        }
-
-        protected override void OnAppearing()
-        {
-            base.OnAppearing();
-            (BindingContext as BaseViewModel).Init();
         }
     }
 }

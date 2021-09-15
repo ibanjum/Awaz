@@ -56,9 +56,9 @@ namespace Shot.ViewModels
             set { SetPropertyValue(value); }
         }
 
-        public string CreationDateValue
+        public DateTime CreationDateValue
         {
-            get { return GetPropertyValue<string>(); }
+            get { return GetPropertyValue<DateTime>(); }
             set { SetPropertyValue(value); }
         }
 

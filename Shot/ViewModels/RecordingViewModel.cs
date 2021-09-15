@@ -12,19 +12,26 @@ using Shot.Extensions;
 using Shot.Models;
 using Shot.Navigation;
 using Shot.Services;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace Shot.ViewModels
 {
-    public class RecordingViewModel : BaseViewModel
+    public class RecordingViewModel : BaseViewModel, IMessageSender
     {
         private readonly IRecordingService _recordingService;
         private readonly INavigationService _navigationService;
         private readonly IPermissionsService _permissionsService;
 
-        public string Title => AppResources.AppTitle;
+        public string Title => AppResources.RecordingStartLabel;
         public string RecordingsListText => AppResources.RecordingsListText;
         public string CompleteRecordingCommandText => AppResources.DoneLabel;
+
+        public string RecordPauseImageSource
+        {
+            get { return GetPropertyValue<string>(); }
+            set { SetPropertyValue(value); }
+        }
 
         public string RecordingText
         {
@@ -64,16 +71,18 @@ namespace Shot.ViewModels
 
         public RecordingStatus RecordingStatus
         {
-            get { return GetPropertyValue(_recordingService.Status); }
+            get { return GetPropertyValue<RecordingStatus>(); }
             set
             {
                 SetPropertyValue(value);
                 IsDoneCommandEnabled = RecordingStatus != RecordingStatus.Stopped;
+                RecordPauseImageSource = RecordingStatus == RecordingStatus.Running ? ImageNames.PlayerPauseImage : ImageNames.RecordImage;
             }
         }
 
         public ICommand RecordPauseCommand => new Command(OnPlayPausePressed);
         public ICommand CompleteRecordingCommand => new Command(OnRecordingDonePressed);
+        public ICommand SettingsCommand => new Command(OnSettingsPressed);
 
         private readonly ObservableCollection<double> _observableValues;
         private readonly ObservableCollection<double> _negativeObservableValues;
@@ -82,18 +91,19 @@ namespace Shot.ViewModels
 
         public RecordingViewModel(
             INavigationService navigationService,
-            IPermissionsService permissionsService) : base(navigationService)
+            IPermissionsService permissionsService,
+            IDevicePlatform devicePlatform) : base(navigationService)
         {
             _navigationService = navigationService;
             _permissionsService = permissionsService;
             _recordingService = DependencyService.Get<IRecordingService>();
             _observableValues = new ObservableCollection<double>();
             _negativeObservableValues = new ObservableCollection<double>();
-        }
 
-        public override Task Init()
-        {
-            _observableValues.Clear();
+            if (devicePlatform.Platform == PlaformEnum.Android)
+            {
+                SubscribeRecordingStatus();
+            }
 
             Series = GraphExtension.CreateGraph(_observableValues, _negativeObservableValues);
             YAxes = new Axis[] { new Axis() { ShowSeparatorLines = false, Labeler = (value) => string.Empty } };
@@ -101,15 +111,13 @@ namespace Shot.ViewModels
 
             _stopwatch = new Stopwatch();
             isMediaRecorderOn = true;
-            RecordingStatus = _recordingService.Status;
+            RecordingStatus = RecordingStatus.Stopped;
             SetRecordingTimer();
-
-            return Task.CompletedTask;
         }
 
         private async void OnPlayPausePressed()
         {
-            switch (_recordingService.Status)
+            switch (RecordingStatus)
             {
                 case RecordingStatus.Running:
                     _recordingService.Pause();
@@ -127,24 +135,23 @@ namespace Shot.ViewModels
                         var ifPermissionGranted = await _permissionsService.CheckOrRequestMicrophoneAndSpeechPermission();
                         if (ifPermissionGranted)
                         {
-                            _recordingService.Start(FileExtension.GetFilePath(fileName));
+                            var filePath = FileExtension.GetFilePath(fileName);
+                            _recordingService.Start(filePath);
                             _stopwatch.Start();
+                            await SecureStorage.SetAsync(ConsStrings.RecordingStartedKey, filePath);
                         }
                     }
                     break;
             }
-
-            RecordingStatus = _recordingService.Status;
         }
 
         private void OnRecordingDonePressed()
         {
-            RecordingStatus = _recordingService.Status;
             _recordingService.Pause();
             _recordingService.Stop();
             _stopwatch.Reset();
             Series.Clear();
-            RecordingStatus = _recordingService.Status;
+            SecureStorage.Remove(ConsStrings.RecordingStartedKey);
         }
 
         private void SetRecordingTimer()
@@ -170,6 +177,19 @@ namespace Shot.ViewModels
                 {
                     return false;
                 }
+            });
+        }
+
+        private async void OnSettingsPressed()
+        {
+            await _navigationService.NavigateTo<SettingsViewModel>();
+        }
+
+        private void SubscribeRecordingStatus()
+        {
+            MessagingCenter.Subscribe<IMessageSender, string>(this, "RS", (s, e) =>
+            {
+                RecordingStatus = (RecordingStatus)Enum.Parse(typeof(RecordingStatus), e);
             });
         }
     }

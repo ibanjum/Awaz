@@ -30,10 +30,12 @@ namespace Shot.DependencyInjection
             Bind<RecordingViewModel>().ToSelf();
             Bind<RecordingsListViewModel>().ToSelf();
             Bind<PlayerViewModel>().ToSelf();
+            Bind<SettingsViewModel>().ToSelf();
 
             //Services
             Bind<IPermissionsService>().To<PermissionsService>().InSingletonScope();
             Bind<IPermissions>().To<PermissionsImplementation>().InSingletonScope();
+            Bind<IDevicePlatform>().To<Services.DevicePlatform>().InSingletonScope();
         }
 
         public void Map(INavigationService navigationService)
@@ -50,6 +52,10 @@ namespace Shot.DependencyInjection
             navigationService.RegisterMapping(
                 typeof(PlayerViewModel),
                 typeof(PlayerPage));
+
+            navigationService.RegisterMapping(
+                typeof(SettingsViewModel),
+                typeof(SettingsPage));
         }
     }
 }

@@ -21,6 +21,9 @@ namespace Shot.ViewModels
 
         public string RecordingsListTitle => AppResources.RecordingsListTitle;
         public string SearchFieldPlaceHolderText => AppResources.SearchFieldPlaceHolderLabel;
+        public string RecordImageSource => ImageNames.RecordImage;
+        public string DeleteImageSource => ImageNames.DeleteImage;
+        public string ShareImageSource => ImageNames.ShareImage;
 
         public string SelectButtonText
         {
@@ -84,7 +87,7 @@ namespace Shot.ViewModels
         {
             Recordings.Clear();
 
-            var pathString = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "recordings");
+            var pathString = FileExtension.CreateRecordingDirectory();
             var filePaths = Directory.GetFiles(pathString);
             foreach (var filePath in filePaths)
             {
@@ -100,6 +103,9 @@ namespace Shot.ViewModels
                     ClickPressCommand = new Command(OnClickPressed)
                 });
             }
+            var list = Recordings.ToList();
+            list.Sort((x, y) => y.CreationTime.CompareTo(x.CreationTime));
+            Recordings = new ObservableCollection<RecordingCellModel>(list);
         }
 
         private void OnSelectPressed()

@@ -1,8 +1,12 @@
-﻿using Ninject;
+﻿using System;
+using System.Diagnostics;
+using System.Windows.Input;
+using Ninject;
 using Shot.DependencyInjection;
 using Shot.Navigation;
 using Shot.Pages;
 using Shot.ViewModels;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace Shot
@@ -11,14 +15,16 @@ namespace Shot
     {
         public StandardKernel Kernel { get; set; }
 
+        private ICommand SetThemeCommand => new Command(SetTheme);
+        private const string CURRENT_THEME_KEY = "CurrentTheme";
+
         public App()
         {
             InitializeComponent();
-            OSAppTheme currentTheme = Current.RequestedTheme;
-            Color barColor = currentTheme == OSAppTheme.Dark ? Color.FromHex("#191919") : Color.WhiteSmoke;
-            Color barTextColor = currentTheme == OSAppTheme.Dark ? Color.WhiteSmoke : Color.FromHex("#191919");
 
-            var recordingPage = new NavigationPage(new RecordingsListPage()) { BarBackgroundColor = barColor, BarTextColor = barTextColor };
+            SetThemeCommand.Execute(null);
+
+            var recordingPage = new NavigationPage(new RecordingsListPage());
             var provider = new ProviderRegisterationController(recordingPage.Navigation);
             Kernel = new StandardKernel(provider);
 
@@ -30,16 +36,21 @@ namespace Shot
             MainPage = recordingPage;
         }
 
-        protected override void OnStart()
+        private async void SetTheme()
         {
-        }
-
-        protected override void OnSleep()
-        {
-        }
-
-        protected override void OnResume()
-        {
+            try
+            {
+                var currentThemeString = await SecureStorage.GetAsync(CURRENT_THEME_KEY);
+                if (!string.IsNullOrEmpty(currentThemeString))
+                {
+                    var currentTheme = (OSAppTheme)Enum.Parse(typeof(OSAppTheme), currentThemeString);
+                    Current.UserAppTheme = currentTheme;
+                }
+            }
+            catch
+            {
+                Debugger.Break();
+            }
         }
     }
 }

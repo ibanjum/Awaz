@@ -3,12 +3,12 @@
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:converters="clr-namespace:Shot.Converters"
-    xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
     x:Class="Shot.Pages.PlayerPage"
     Title="{Binding Title}"
     Style="{DynamicResource BackGroundPrimary}">
     <ContentPage.Resources>
         <converters:DurationConverter x:Key="durationConverter"/>
+        <converters:CreationConverter x:Key="creationDateConverter"/>
     </ContentPage.Resources>
     <ContentPage.ToolbarItems>
         <ToolbarItem
@@ -34,19 +34,22 @@
                 </Grid.RowDefinitions>
                 <Label
                     Text="{Binding CreationDateText}"
+                    FontAttributes="Bold"
                     Style="{DynamicResource TextStylePrimary}"
                     Grid.Row="0" Grid.Column="0"/>
                 <Label
                     Text="{Binding RecordingSizeText}"
+                    FontAttributes="Bold"
                     Style="{DynamicResource TextStylePrimary}"
                     Grid.Row="1" Grid.Column="0"/>
                 <Label
                     Text="{Binding RecordingFormatText}"
+                    FontAttributes="Bold"
                     Style="{DynamicResource TextStylePrimary}"
                     Grid.Row="2" Grid.Column="0"/>
 
                 <Label
-                    Text="{Binding CreationDateValue}"
+                    Text="{Binding CreationDateValue, Converter={StaticResource creationDateConverter}}"
                     Style="{DynamicResource TextStyleSecondary}"
                     Grid.Row="0" Grid.Column="1"
                     HorizontalTextAlignment="End"/>

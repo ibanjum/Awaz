@@ -220,5 +220,29 @@ namespace Shot {
                 return ResourceManager.GetString("MoreLabel", resourceCulture);
             }
         }
+        
+        internal static string SettingsTitle {
+            get {
+                return ResourceManager.GetString("SettingsTitle", resourceCulture);
+            }
+        }
+        
+        internal static string ThemeLabel {
+            get {
+                return ResourceManager.GetString("ThemeLabel", resourceCulture);
+            }
+        }
+        
+        internal static string LightLabel {
+            get {
+                return ResourceManager.GetString("LightLabel", resourceCulture);
+            }
+        }
+        
+        internal static string DarkLabel {
+            get {
+                return ResourceManager.GetString("DarkLabel", resourceCulture);
+            }
+        }
     }
 }

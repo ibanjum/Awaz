@@ -8,7 +8,7 @@ namespace Shot.Models
     {
         public string Name { get; set; }
         public string FilePath { get; set; }
-        public string CreationTime { get; set; }
+        public DateTime CreationTime { get; set; }
         public int Duration { get; set; }
         public string FileSize { get; set; }
         public string FileFormat { get; set; }

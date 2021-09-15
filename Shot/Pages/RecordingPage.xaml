@@ -4,8 +4,13 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Xamarin.Forms;assembly=LiveChartsCore.SkiaSharpView.XamarinForms"
     x:Class="Shot.Pages.RecordingPage"
-    xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
+    Title="{Binding Title}"
     Style="{DynamicResource BackGroundPrimary}">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem
+            IconImageSource="settings_icon"
+            Command="{Binding SettingsCommand}"/>
+    </ContentPage.ToolbarItems>
     <ContentPage.Content>
         <StackLayout Spacing="0">
             <Grid VerticalOptions="FillAndExpand" RowSpacing="0">
@@ -28,41 +33,46 @@
                 <StackLayout
                     Grid.Row="2"
                     Spacing="16"
+                    Padding="8, 8, 8, 8"
                     VerticalOptions="FillAndExpand"
                      BackgroundColor="{AppThemeBinding Light={StaticResource LightSecondaryColor}, Dark={StaticResource DarkSecondaryColor}}">
+
+                    <Label
+                            Text="{Binding TimeText}"
+                            Style="{DynamicResource TextStylePrimary}"
+                            VerticalTextAlignment="Center"
+                            HorizontalTextAlignment="Center"
+                            HorizontalOptions="CenterAndExpand"/>
                     <Grid Margin="0, 8, 0, 8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="33*"/>
                             <ColumnDefinition Width="33*"/>
                             <ColumnDefinition Width="33*"/>
                         </Grid.ColumnDefinitions>
-                        <Label
-                            Text="{Binding TimeText}"
-                            Style="{DynamicResource TextStylePrimary}"
-                            VerticalTextAlignment="Center"
-                            HorizontalTextAlignment="Center"
-                            Grid.Column="1"/>
+                        <ImageButton
+                        Style="{DynamicResource RecordButton}"
+                        Command="{Binding RecordPauseCommand}"
+                        Source="{Binding RecordPauseImageSource}"
+                        HorizontalOptions="CenterAndExpand"
+                        Grid.Column="1">
+                            <ImageButton.Triggers>
+                                <DataTrigger TargetType="ImageButton"
+                                         Binding="{Binding RecordingStatus}"
+                                         Value="Running">
+                                    <Setter Property="Style" Value="{DynamicResource PauseButton}"/>
+                                </DataTrigger>
+                            </ImageButton.Triggers>
+                        </ImageButton>
                         <Button
                             Text="{Binding CompleteRecordingCommandText}"
                             Command="{Binding CompleteRecordingCommand}"
                             TextColor="{DynamicResource LinkColor}"
-                            BackgroundColor="Transparent"
-                            HorizontalOptions="End"
+                            BackgroundColor="{DynamicResource TransparentColor}"
+                            HorizontalOptions="StartAndExpand"
+                            VerticalOptions="StartAndExpand"
                             IsVisible="{Binding IsDoneCommandEnabled}"
                             Grid.Column="2"/>
                     </Grid>
-                    <ImageButton
-                        Style="{DynamicResource RecordButton}"
-                        Command="{Binding RecordPauseCommand}"
-                        HorizontalOptions="CenterAndExpand">
-                        <ImageButton.Triggers>
-                            <DataTrigger TargetType="ImageButton"
-                                         Binding="{Binding RecordingStatus}"
-                                         Value="Running">
-                                <Setter Property="Style" Value="{DynamicResource PauseButton}"/>
-                            </DataTrigger>
-                        </ImageButton.Triggers>
-                    </ImageButton>
                 </StackLayout>
             </Grid>
         </StackLayout>

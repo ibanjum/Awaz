@@ -99,4 +99,16 @@
 	<data name="MoreLabel" xml:space="preserve">
 		<value>More</value>
     </data>
+	<data name="SettingsTitle" xml:space="preserve">
+		<value>Settings</value>
+    </data>
+	<data name="ThemeLabel" xml:space="preserve">
+		<value>Theme</value>
+    </data>
+	<data name="LightLabel" xml:space="preserve">
+		<value>Light</value>
+    </data>
+	<data name="DarkLabel" xml:space="preserve">
+		<value>Dark</value>
+    </data>
 </root>
