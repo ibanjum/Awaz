@@ -16,6 +16,12 @@
 	<style name="MainTheme.Base" parent="Theme.AppCompat.Light.DarkActionBar">
 		<item name="colorAccent">#3366BB</item>
 		<item name="android:actionMenuTextColor">#3366BB</item>
+		<item name="primaryTextColor">#ffffff</item>
+		<item name="primarySecondarygroundColor">@android:color/darker_gray</item>
 		<!-- You can also set colorControlNormal, colorControlActivated colorControlHighlight and colorSwitchThumbNormal. -->
+	</style>
+	<style name="MyMaterialTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+		<!-- Add attributes here -->
+		<item name="colorPrimary">@android:color/holo_blue_dark</item>
 	</style>
 </resources>

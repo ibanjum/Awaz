@@ -14,9 +14,8 @@ using Xamarin.Essentials;
 
 namespace Shot.ViewModels
 {
-    public class RecordingsListViewModel : BaseViewModel
+    public class RecordingsListViewModel : ConsistentPlayerViewModel
     {
-        private readonly IPlayerService _playerService;
         private readonly INavigationService _navigationService;
 
         public string RecordingsListTitle => AppResources.RecordingsListTitle;
@@ -34,12 +33,6 @@ namespace Shot.ViewModels
         public string SeletedRecordingCountText
         {
             get { return GetPropertyValue<string>(); }
-            set { SetPropertyValue(value); }
-        }
-
-        public ObservableCollection<RecordingCellModel> Recordings
-        {
-            get { return GetPropertyValue<ObservableCollection<RecordingCellModel>>(); }
             set { SetPropertyValue(value); }
         }
 
@@ -71,12 +64,12 @@ namespace Shot.ViewModels
             INavigationService navigationService) : base(navigationService)
         {
             _navigationService = navigationService;
-            _playerService = DependencyService.Get<IPlayerService>();
             Recordings = new ObservableCollection<RecordingCellModel>();
         }
 
         public override Task Init()
         {
+            PlayerService = DependencyService.Get<IPlayerService>();
             PopulateRecordings();
             IsSectionModeOn = false;
             SeletedRecordingCountText = AppResources.SelectItemsLabel;
@@ -96,7 +89,7 @@ namespace Shot.ViewModels
                     Name = FileExtension.GetEnteredName(filePath),
                     FilePath = filePath,
                     CreationTime = FileExtension.GetCreationTime(filePath),
-                    Duration = _playerService.GetMetaDataDuration(filePath),
+                    Duration = PlayerService.GetMetaDataDuration(filePath),
                     FileSize = FileExtension.GetFileSize(filePath),
                     FileFormat = FileExtension.GetFileExtension(filePath),
                     LongPressCommand = new Command(OnLongPressed),
@@ -194,7 +187,7 @@ namespace Shot.ViewModels
             }
         }
 
-        private async void OnClickPressed(object obj)
+        private void OnClickPressed(object obj)
         {
             if (obj == null)
                 return;
@@ -224,7 +217,10 @@ namespace Shot.ViewModels
             }
             else
             {
-                await _navigationService.NavigateTo<PlayerViewModel, RecordingCellModel>(cell);
+                CurrentRecording = cell;
+                PlayCommand.Execute(null);
+                //await _navigationService.NavigateTo<PlayerViewModel, RecordingCellModel>(cell);
+
             }
         }
     }

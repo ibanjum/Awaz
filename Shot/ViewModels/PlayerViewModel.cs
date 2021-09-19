@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Shot.Enumerations;
 using Shot.Extensions;
@@ -9,9 +11,8 @@ using Xamarin.Forms;
 
 namespace Shot.ViewModels
 {
-    public class PlayerViewModel : BaseViewModel<RecordingCellModel>
+    public class PlayerViewModel : ConsistentPlayerViewModel
     {
-        private readonly IPlayerService _playerService;
         private readonly INavigationService _navigationService;
 
         public string CreationDateText => AppResources.CreationDateLabel;
@@ -20,6 +21,9 @@ namespace Shot.ViewModels
         public string DeleteText => AppResources.DeleteLabel;
         public string ShareText => AppResources.ShareLabel;
         public string MoreText => AppResources.MoreLabel;
+        public string RewindImageSource => ImageNames.RewindImage;
+        public string ForwardImageSource => ImageNames.ForwardImage;
+        public string ExpandImageSource => ImageNames.ExpandImage;
 
         public bool IsDragging
         {
@@ -32,9 +36,15 @@ namespace Shot.ViewModels
             set { SetPropertyValue(value); }
         }
 
-        public int CurrentSliderPosition
+        public string CurrentTimeText
         {
-            get { return GetPropertyValue<int>(); }
+            get { return GetPropertyValue<string>(); }
+            set { SetPropertyValue(value); }
+        }
+
+        public DateTime CreationDateValue
+        {
+            get { return GetPropertyValue<DateTime>(); }
             set { SetPropertyValue(value); }
         }
 
@@ -44,21 +54,9 @@ namespace Shot.ViewModels
             set { SetPropertyValue(value); }
         }
 
-        public string CurrentTimeText
+        public string RecordingName
         {
             get { return GetPropertyValue<string>(); }
-            set { SetPropertyValue(value); }
-        }
-
-        public string PlayPauseImageSource
-        {
-            get { return GetPropertyValue<string>(); }
-            set { SetPropertyValue(value); }
-        }
-
-        public DateTime CreationDateValue
-        {
-            get { return GetPropertyValue<DateTime>(); }
             set { SetPropertyValue(value); }
         }
 
@@ -80,88 +78,54 @@ namespace Shot.ViewModels
             set { SetPropertyValue(value); }
         }
 
-        public string RewindButtonText => string.Format("-{0}", AppResources.TenSecButtonLabel);
-
-        public string ForwardButtonText => string.Format("+{0}", AppResources.TenSecButtonLabel);
-
-        public RecordingStatus PlayingStatus
-        {
-            get { return GetPropertyValue(_playerService.Status); }
-            set
-            {
-                SetPropertyValue(value);
-                PlayPauseImageSource = PlayingStatus == RecordingStatus.Running ? ImageNames.PlayerPauseImage : ImageNames.PlayerPlayImage;
-            }
-        }
-
-        public RecordingCellModel RecordingCellModel
-        {
-            get { return GetPropertyValue<RecordingCellModel>(); }
-            set { SetPropertyValue(value); }
-        }
-
-        public ICommand PlayCommand => new Command(OnPlayPressed);
         public ICommand ForwardCommand => new Command(OnForwardPressed);
         public ICommand RewindCommand => new Command(OnRewindPressed);
         public ICommand DragStartedCommand => new Command(OnDragStarted);
         public ICommand DragCompletedCommand => new Command(OnDragCompleted);
         public ICommand MoreCommand => new Command(OnMorePressed);
-
-        private bool isMediaPlayerOn;
+        public ICommand ExpandCommand => new Command(async () => await OnExpandPressed());
 
         public PlayerViewModel(INavigationService navigationService) : base(navigationService)
         {
             _navigationService = navigationService;
-            _playerService = DependencyService.Get<IPlayerService>();
             SliderMaximum = 1;
-            CurrentSliderPosition = 0;
-            PlayingStatus = _playerService.Status;
         }
 
-        public override void Init(RecordingCellModel recordingCellModel)
+        public override void UpdateTimerData()
         {
-            RecordingCellModel = recordingCellModel;
-            _playerService.SetPlayer(RecordingCellModel?.FilePath);
-            isMediaPlayerOn = true;
-            SetPlayerTimer();
-            SliderMaximum = RecordingCellModel.Duration;
-            CreationDateValue = RecordingCellModel.CreationTime;
-            RecordingFormatValue = RecordingCellModel.FileFormat;
-            RecordingSizeValue = RecordingCellModel.FileSize;
-            Title = RecordingCellModel.Name;
-            TotalDurationText = TimeSpan.FromMilliseconds(RecordingCellModel.Duration).ToString(@"hh\:mm\:ss");
+            base.UpdateTimerData();
+
+            if (PlayerService == null)
+                return;
+
+            CurrentTimeText = TimeSpan.FromMilliseconds(PlayerService.GetCurrentPosition()).ToString(@"hh\:mm\:ss");
         }
 
-        public override void NavigateBack()
+        private void UpdateRecording()
         {
-            base.NavigateBack();
-            isMediaPlayerOn = false;
-        }
-
-        private void OnPlayPressed()
-        {
-            switch (PlayingStatus)
-            {
-                case RecordingStatus.Stopped:
-                case RecordingStatus.Paused:
-                    _playerService.Play();
-                    break;
-                case RecordingStatus.Running:
-                    _playerService.Pause();
-                    break;
-            }
-
-            PlayingStatus = _playerService.Status;
-        }
-
-        private void OnForwardPressed()
-        {
-            _playerService.SeekTo(10000, isRelative: true);
+            CreationDateValue = CurrentRecording.CreationTime;
+            RecordingFormatValue = CurrentRecording.FileFormat;
+            RecordingSizeValue = CurrentRecording.FileSize;
+            Title = CurrentRecording.Name;
+            TotalDurationText = TimeSpan.FromMilliseconds(CurrentRecording.Duration).ToString(@"hh\:mm\:ss");
+            RecordingName = CurrentRecording.Name;
+            SliderMaximum = CurrentRecording.Duration;
         }
 
         private void OnRewindPressed()
         {
-            _playerService.SeekTo(-10000, isRelative: true);
+            PlayerService.Pause();
+            var currentIndex = Recordings.IndexOf(CurrentRecording);
+            RecordingCellModel prevRecording;
+
+            if (currentIndex - 1 >= 0)
+                prevRecording = Recordings[currentIndex - 1];
+            else
+                prevRecording = Recordings[Recordings.Count - 1];
+
+            PlayerService.SetPlayer(prevRecording.FilePath);
+            CurrentRecording = prevRecording;
+            PlayerService.Play();
         }
 
         private void OnDragStarted(object obj)
@@ -171,47 +135,34 @@ namespace Shot.ViewModels
 
         private void OnDragCompleted(object obj)
         {
-            _playerService.SeekTo(CurrentSliderPosition, isRelative: false);
+            PlayerService.SeekTo(CurrentSliderPosition, isRelative: false);
             IsDragging = false;
-        }
-
-        private void SetPlayerTimer()
-        {
-            Device.StartTimer(TimeSpan.FromMilliseconds(1), () =>
-            {
-                if (isMediaPlayerOn)
-                {
-                    CurrentTimeText = TimeSpan.FromMilliseconds(_playerService.GetCurrentPosition()).ToString(@"hh\:mm\:ss");
-                    if (!IsDragging)
-                    {
-                        CurrentSliderPosition = _playerService.GetCurrentPosition();
-                    }
-                    if (_playerService.GetMetaDataDuration(RecordingCellModel?.FilePath).Equals(_playerService.GetCurrentPosition()))
-                        PlayingStatus = RecordingStatus.Stopped;
-
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            });
         }
 
         private async void OnMorePressed()
         {
-            var selectedButton = await _navigationService.DisplayActionSheet(ActionSheetExtension.GetSelectedRecordingActionSheetModel(RecordingCellModel.FilePath));
+            var selectedButton = await _navigationService.DisplayActionSheet(ActionSheetExtension.GetSelectedRecordingActionSheetModel(CurrentRecording.FilePath));
 
             if (selectedButton == AppResources.DeleteLabel)
             {
-                isMediaPlayerOn = false;
-                FileExtension.DeleteFile(RecordingCellModel.FilePath);
+                FileExtension.DeleteFile(CurrentRecording.FilePath);
                 await _navigationService.GoBack();
             }
             else if (selectedButton == AppResources.ShareLabel)
             {
-                await ActionSheetExtension.ShareSingleFile(RecordingCellModel.FilePath);
+                await ActionSheetExtension.ShareSingleFile(CurrentRecording.FilePath);
             }
+        }
+
+        private async Task OnExpandPressed()
+        {
+            await _navigationService.GoBackWithParam(
+                new BaseConsistentPlayerModel()
+                {
+                    CurrentRecording = CurrentRecording,
+                    PlayerService = PlayerService,
+                    Recordings = Recordings
+                });
         }
     }
 }

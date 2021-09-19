@@ -2,9 +2,10 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Shot.Pages.RecordingsListPage"
+             xmlns:view="clr-namespace:Shot.Views"
              xmlns:converters="clr-namespace:Shot.Converters"
              xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
-             Style="{DynamicResource BackGroundPrimary}">
+             HeightRequest="400">
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="{Binding SelectButtonText}"
                     Command="{Binding SelectButtonCommand}"/>
@@ -54,9 +55,9 @@
                 <SearchBar Placeholder="{Binding SearchFieldPlaceHolderText}"
                        TextChanged="OnSearchFieldTextChanged"
                        Style="{DynamicResource SearchBar}"/>
-                <BoxView Style="{DynamicResource BoxView}"/>
+
                 <StackLayout
-                BackgroundColor="{AppThemeBinding Light={StaticResource LightSecondaryColor}, Dark={StaticResource DarkSecondaryColor}}">
+                BackgroundColor="{AppThemeBinding Light={StaticResource LightPrimaryColor}, Dark={StaticResource DarkSecondaryColor}}">
                     <ListView ItemsSource="{Binding Recordings}"
                       SelectedItem="{Binding SelectedRecording}"
                       Style="{DynamicResource RecodringsList}"
@@ -67,7 +68,7 @@
                 <StackLayout
                 VerticalOptions="EndAndExpand"
                 IsVisible="{Binding IsSectionModeOn}"
-                BackgroundColor="{AppThemeBinding Light={StaticResource LightPrimaryColor}, Dark={StaticResource DarkPrimaryColor}}"
+                BackgroundColor="{AppThemeBinding Light={StaticResource LightPrimaryColor}, Dark={StaticResource DarkSecondaryColor}}"
                 Spacing="0">
                     <BoxView Style="{DynamicResource BoxView}"/>
                     <StackLayout

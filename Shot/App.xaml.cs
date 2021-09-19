@@ -23,7 +23,6 @@ namespace Shot
             InitializeComponent();
 
             SetThemeCommand.Execute(null);
-
             var recordingPage = new NavigationPage(new RecordingsListPage());
             var provider = new ProviderRegisterationController(recordingPage.Navigation);
             Kernel = new StandardKernel(provider);

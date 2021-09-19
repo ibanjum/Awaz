@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+	<attr name="primaryTextColor" format="color" />
+	<attr name="primarySecondarygroundColor" format="color" />
+</resources>

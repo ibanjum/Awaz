@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Shot.Navigation;
-
+using Shot.Services;
 
 namespace Shot.ViewModels
 {

@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ContentView
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="Shot.Views.ConsistentPlayerView">
+    <ContentView.Content>
+        <StackLayout Spacing="0"
+            BackgroundColor="{AppThemeBinding Light={StaticResource LightPrimaryColor}, Dark={StaticResource DarkPrimaryColor}}">
+            <Slider
+                ThumbColor="{DynamicResource TransparentColor}"
+                Maximum="{Binding SliderMaximum}"
+                Value="{Binding CurrentSliderPosition}"/>
+            <StackLayout Orientation="Horizontal">
+                <Label
+                Text="{Binding RecordingName}"
+                Style="{DynamicResource TextStylePrimary}"
+                Padding="16, 0, 0, 0"
+                VerticalTextAlignment="Center"/>
+                <ImageButton
+                    Command="{Binding PlayCommand}"
+                    Style="{DynamicResource SecondaryButton}"
+                    Source="{Binding PlayPauseImageSource}"
+                    HorizontalOptions="EndAndExpand"
+                    Margin="0, 0, 16, 8"
+                    Padding="6"/>
+                <StackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ConsistentPlayerCommmand}"/>
+                </StackLayout.GestureRecognizers>
+            </StackLayout>
+        </StackLayout>
+    </ContentView.Content>
+</ContentView>

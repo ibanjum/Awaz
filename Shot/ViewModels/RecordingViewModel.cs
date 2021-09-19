@@ -22,6 +22,7 @@ namespace Shot.ViewModels
         private readonly IRecordingService _recordingService;
         private readonly INavigationService _navigationService;
         private readonly IPermissionsService _permissionsService;
+        private readonly IDevicePlatform _devicePlatform;
 
         public string Title => AppResources.RecordingStartLabel;
         public string RecordingsListText => AppResources.RecordingsListText;
@@ -96,18 +97,19 @@ namespace Shot.ViewModels
         {
             _navigationService = navigationService;
             _permissionsService = permissionsService;
+            _devicePlatform = devicePlatform;
             _recordingService = DependencyService.Get<IRecordingService>();
             _observableValues = new ObservableCollection<double>();
             _negativeObservableValues = new ObservableCollection<double>();
 
-            if (devicePlatform.Platform == PlaformEnum.Android)
+            if (_devicePlatform.Platform == PlaformEnum.Android)
             {
                 SubscribeRecordingStatus();
             }
 
             Series = GraphExtension.CreateGraph(_observableValues, _negativeObservableValues);
             YAxes = new Axis[] { new Axis() { ShowSeparatorLines = false, Labeler = (value) => string.Empty } };
-            XAxes = new Axis[] { new Axis() { Labeler = (value) => string.Empty } };
+            XAxes = new Axis[] { new Axis() { Labeler = (value) => string.Empty, MaxLimit = 100 } };
 
             _stopwatch = new Stopwatch();
             isMediaRecorderOn = true;
@@ -166,9 +168,18 @@ namespace Shot.ViewModels
                         var amplitude = _recordingService.MaxAmplitude;
                         if (amplitude != null)
                         {
+                            if (_observableValues.Count > 100)
+                            {
+                                _observableValues.RemoveAt(0);
+                                _negativeObservableValues.RemoveAt(0);
+                            }
                             var negativeAmplitude = -amplitude;
                             _observableValues.Add((double)amplitude);
                             _negativeObservableValues.Add((double)negativeAmplitude);
+                        }
+                        if (_devicePlatform.Platform == PlaformEnum.Android)
+                        {
+                            MessagingCenter.Send<IMessageSender, string>(this, "TT", TimeText);
                         }
                     }
                     return true;

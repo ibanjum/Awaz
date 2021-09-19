@@ -37,6 +37,7 @@
     <None Remove="LiveChartsCore.SkiaSharpView.XamarinForms" />
     <None Remove="SkiaSharp" />
     <None Remove="Xamarin.CommunityToolkit" />
+    <None Remove="Views\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DependencyInjection\" />
@@ -48,6 +49,7 @@
     <Folder Include="Extensions\" />
     <Folder Include="Enumerations\" />
     <Folder Include="Converters\" />
+    <Folder Include="Views\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="AppResources.resx">

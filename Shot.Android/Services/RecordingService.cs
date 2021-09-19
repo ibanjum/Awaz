@@ -4,8 +4,9 @@ using Android.Content;
 using Android.Media;
 using Android.OS;
 using Android.Runtime;
+using Android.Views;
+using Android.Widget;
 using AndroidX.Core.App;
-using Ninject;
 using Shot.Enumerations;
 using Shot.Services;
 using Shot.ViewModels;
@@ -106,8 +107,6 @@ namespace Shot.Droid.Services
                 return;
 
             var channel = new NotificationChannel(CHANNEL_ID, "asd", NotificationImportance.Default);
-            channel.Description = "bro";
-
             var notificationManager = (NotificationManager)GetSystemService(NotificationService);
             notificationManager.CreateNotificationChannel(channel);
         }
@@ -117,17 +116,36 @@ namespace Shot.Droid.Services
 
         private void Notification(string title, string msg, string ticker, int notifId)
         {
+            /*var playPauseIntent = new Intent(MainActivity.Context, typeof(RecordingReceiver));
+            //var timerNotificationIntentValue = this.GetTimerNotificationIntentValue(timerAction);
+            playPauseIntent.PutExtra("timerNotification", 3);
+
+            const int playPauseIntentId = 0;
+            var playPausePendingIntent = PendingIntent.GetBroadcast(MainActivity.Context, playPauseIntentId, playPauseIntent, PendingIntentFlags.UpdateCurrent);
+
+            _widgetLayout = new RemoteViews(PackageName, Resource.Layout.mainx);
+            _widgetLayout.SetTextViewText(Resource.Id.textView1, "nothing");
+            _widgetLayout.SetOnClickPendingIntent(Resource.Id.button1, playPausePendingIntent);*/
+
+            Intent intent = new Intent(MainActivity.Context, typeof(MainActivity));
+
+            PendingIntent pendingIntent = PendingIntent.GetActivity(MainActivity.Context, 2, intent, PendingIntentFlags.UpdateCurrent);
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .SetContentTitle(title)
-                .SetContentText(msg)
-                .SetTicker(ticker)
+                .SetContentIntent(pendingIntent)
+                .SetContentTitle("Awaz")
                 .SetDefaults((int)NotificationDefaults.Sound)
                 .SetVisibility((int)NotificationVisibility.Public)
                 .SetSmallIcon(Resource.Drawable.record);
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.From(this);
             notificationManager.Notify(notifId, builder.Build());
+
+            MessagingCenter.Subscribe<IMessageSender, string>(this, "TT", (s, e) =>
+            {
+                builder.SetContentTitle(string.Format("Recording • {0}", e));
+                notificationManager.Notify(notifId, builder.Build());
+            });
         }
     }
 }

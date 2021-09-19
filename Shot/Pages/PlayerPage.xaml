@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:converters="clr-namespace:Shot.Converters"
     x:Class="Shot.Pages.PlayerPage"
+    xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
     Title="{Binding Title}"
     Style="{DynamicResource BackGroundPrimary}">
     <ContentPage.Resources>
@@ -16,95 +17,111 @@
             Command="{Binding MoreCommand}"/>
     </ContentPage.ToolbarItems>
     <ContentPage.Content>
-        <Grid RowSpacing="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="70*"/>
-                <RowDefinition Height="1"/>
-                <RowDefinition Height="30*"/>
-            </Grid.RowDefinitions>
-            <Grid RowSpacing="0" Grid.Row="0" Margin="32" VerticalOptions="CenterAndExpand">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="50*"/>
-                    <ColumnDefinition Width="50*"/>
-                </Grid.ColumnDefinitions>
+        <StackLayout>
+            <xct:MediaElement/>
+            <ImageButton Source="{Binding ExpandImageSource}"
+                       Command="{Binding ExpandCommand}"
+                         VerticalOptions="StartAndExpand"
+                         HorizontalOptions="StartAndExpand"
+                         BackgroundColor="{DynamicResource TransparentColor}"
+                         HeightRequest="36"
+                         WidthRequest="36"
+                         Margin="16"/>
+            <Grid RowSpacing="0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="44"/>
-                    <RowDefinition Height="44"/>
-                    <RowDefinition Height="44"/>
+                    <RowDefinition Height="70*"/>
+                    <RowDefinition Height="1"/>
+                    <RowDefinition Height="30*"/>
                 </Grid.RowDefinitions>
-                <Label
+                <Grid RowSpacing="0" Grid.Row="0" Margin="32" VerticalOptions="CenterAndExpand">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="50*"/>
+                        <ColumnDefinition Width="50*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="44"/>
+                        <RowDefinition Height="44"/>
+                        <RowDefinition Height="44"/>
+                    </Grid.RowDefinitions>
+                    <Label
                     Text="{Binding CreationDateText}"
                     FontAttributes="Bold"
                     Style="{DynamicResource TextStylePrimary}"
                     Grid.Row="0" Grid.Column="0"/>
-                <Label
+                    <Label
                     Text="{Binding RecordingSizeText}"
                     FontAttributes="Bold"
                     Style="{DynamicResource TextStylePrimary}"
                     Grid.Row="1" Grid.Column="0"/>
-                <Label
+                    <Label
                     Text="{Binding RecordingFormatText}"
                     FontAttributes="Bold"
                     Style="{DynamicResource TextStylePrimary}"
                     Grid.Row="2" Grid.Column="0"/>
 
-                <Label
+                    <Label
                     Text="{Binding CreationDateValue, Converter={StaticResource creationDateConverter}}"
                     Style="{DynamicResource TextStyleSecondary}"
                     Grid.Row="0" Grid.Column="1"
                     HorizontalTextAlignment="End"/>
-                <Label
+                    <Label
                     Text="{Binding RecordingSizeValue}"
                     Style="{DynamicResource TextStyleSecondary}"
                     Grid.Row="1" Grid.Column="1"
                     HorizontalTextAlignment="End"/>
-                <Label
+                    <Label
                     Text="{Binding RecordingFormatValue}"
                     Style="{DynamicResource TextStyleSecondary}"
                     Grid.Row="2" Grid.Column="1"
                     HorizontalTextAlignment="End"/>
-            </Grid>
-            <BoxView Style="{DynamicResource BoxView}" Grid.Row="1"/>
-            <StackLayout
+                </Grid>
+                <BoxView Style="{DynamicResource BoxView}" Grid.Row="1"/>
+                <StackLayout
                 BackgroundColor="{AppThemeBinding Light={StaticResource LightSecondaryColor}, Dark={StaticResource DarkSecondaryColor}}"
                 Grid.Row="2"
                 Padding="32">
-                <Slider
+                    <Slider
                 x:Name="PlayerSlider"
                 Maximum="{Binding SliderMaximum}"
                 Value="{Binding CurrentSliderPosition}"
                 DragStartedCommand="{Binding DragStartedCommand}"
                 DragCompletedCommand="{Binding DragCompletedCommand}"
                 Style="{DynamicResource PlayerSlider}"/>
-                <StackLayout
-                Orientation="Horizontal">
-                    <Label
+                    <StackLayout
+                Orientation="Horizontal" >
+                        <Label
                     Text="{Binding CurrentTimeText}"
                     HorizontalOptions="StartAndExpand"
                     Style="{DynamicResource TextStyleSecondary}"/>
-                    <Label
+                        <Label
                     Text="{Binding TotalDurationText}"
                     HorizontalOptions="EndAndExpand"
                     Style="{DynamicResource TextStyleSecondary}"/>
-                </StackLayout>
-                <StackLayout
+                    </StackLayout>
+                    <StackLayout
                     HorizontalOptions="CenterAndExpand"
                 Orientation="Horizontal"
-                Spacing="16">
-                    <Button
-                    Text="{Binding RewindButtonText}"
+                    Margin="0, 16, 0, 0"
+                Spacing="44">
+                        <ImageButton
                     Command="{Binding RewindCommand}"
-                    Style="{DynamicResource TextButton}"/>
-                    <ImageButton
+                    Style="{DynamicResource SecondaryButton}"
+                    Source="{Binding RewindImageSource}"
+                    HeightRequest="26"
+                    WidthRequest="26"/>
+                        <ImageButton
                     Command="{Binding PlayCommand}"
-                    Style="{DynamicResource PlayerPlayPauseButton}"
+                    Style="{DynamicResource SecondaryButton}"
                     Source="{Binding PlayPauseImageSource}"/>
-                    <Button
-                    Text="{Binding ForwardButtonText}"
+                        <ImageButton
                     Command="{Binding ForwardCommand}"
-                    Style="{DynamicResource TextButton}"/>
+                    Style="{DynamicResource SecondaryButton}"
+                    Source="{Binding ForwardImageSource}"
+                    HeightRequest="26"
+                    WidthRequest="26"/>
+                    </StackLayout>
                 </StackLayout>
-            </StackLayout>
-        </Grid>
+            </Grid>
+        </StackLayout>
     </ContentPage.Content>
 </ContentPage>

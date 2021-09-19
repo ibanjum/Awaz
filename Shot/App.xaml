@@ -23,7 +23,7 @@
 
         <Style TargetType="NavigationPage">
             <Setter Property="BarBackgroundColor"
-                    Value="{AppThemeBinding Light={StaticResource LightPrimaryColor}, Dark={StaticResource DarkPrimaryColor}}" />
+                    Value="{AppThemeBinding Light={StaticResource LightPrimaryColor}, Dark={StaticResource DarkSecondaryColor}}" />
             <Setter Property="BarTextColor"
                     Value="{AppThemeBinding Light={StaticResource DarkPrimaryColor}, Dark={StaticResource LightPrimaryColor}}"/>
         </Style>
@@ -85,7 +85,7 @@
         <Style TargetType="ListView" x:Key="RecodringsList">
             <Setter
                 Property="BackgroundColor"
-                 Value="{AppThemeBinding Light={StaticResource LightSecondaryColor}, Dark={StaticResource DarkSecondaryColor}}" />
+                 Value="{AppThemeBinding Light={StaticResource LightPrimaryColor}, Dark={StaticResource DarkSecondaryColor}}" />
             <Setter Property="SeparatorColor"
                      Value="{StaticResource SubTextColor}" />
             <Setter Property="HasUnevenRows" Value="True"/>
@@ -101,6 +101,9 @@
             <Setter Property="CancelButtonColor"
                     Value="{AppThemeBinding Light={StaticResource DarkPrimaryColor}, Dark={StaticResource LightPrimaryColor}}" />
             <Setter Property="FontSize" Value="Medium"/>
+            <Setter
+                Property="BackgroundColor"
+                 Value="{AppThemeBinding Light={StaticResource LightPrimaryColor}, Dark={StaticResource DarkSecondaryColor}}" />
         </Style>
 
         <Style TargetType="BoxView" x:Key="BoxView">
@@ -120,7 +123,7 @@
                     Value="{StaticResource SubTextColor}"/>
         </Style>
 
-        <Style TargetType="ImageButton" x:Key="PlayerPlayPauseButton">
+        <Style TargetType="ImageButton" x:Key="SecondaryButton">
             <Setter Property="HeightRequest" Value="36"/>
             <Setter Property="WidthRequest" Value="36"/>
             <Setter Property="BackgroundColor" Value="Transparent"/>

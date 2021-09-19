@@ -87,6 +87,18 @@ namespace Shot.Navigation
             }
         }
 
+        public async Task GoBackWithParam<TParameter>(TParameter parameter)
+        {
+            if (CanGoBack)
+            {
+                var page = await navigationRoot.PopModalAsync(true);
+                if (page.BindingContext is BaseViewModel<TParameter> vm)
+                {
+                    vm.Init(parameter);
+                }
+            }
+        }
+
         private async Task NavigateToView(Type viewModelType)
         {
             Type viewType;
@@ -104,7 +116,7 @@ namespace Shot.Navigation
             var vm = ((App)Application.Current).Kernel.Get(viewModelType);
             view.BindingContext = vm;
 
-            await navigationRoot.PushAsync(view, true);
+            await navigationRoot.PushModalAsync(view, true);
         }
 
         public async Task DisplayPopup(PopupModel popup)
@@ -154,5 +166,7 @@ namespace Shot.Navigation
         void ClearBackStack();
 
         Task<string> DisplayActionSheet(ActionSheetModel actionSheetModel);
+
+        Task GoBackWithParam<TParameter>(TParameter parameter);
     }
 }

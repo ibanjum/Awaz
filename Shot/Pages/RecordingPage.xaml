@@ -5,7 +5,7 @@
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Xamarin.Forms;assembly=LiveChartsCore.SkiaSharpView.XamarinForms"
     x:Class="Shot.Pages.RecordingPage"
     Title="{Binding Title}"
-    Style="{DynamicResource BackGroundPrimary}">
+    Style="{DynamicResource BackGroundSecondary}">
     <ContentPage.ToolbarItems>
         <ToolbarItem
             IconImageSource="settings_icon"
@@ -13,30 +13,32 @@
     </ContentPage.ToolbarItems>
     <ContentPage.Content>
         <StackLayout Spacing="0">
-            <Grid VerticalOptions="FillAndExpand" RowSpacing="0">
+            <Grid VerticalOptions="FillAndExpand" RowSpacing="40">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="70*"/>
-                    <RowDefinition Height="1"/>
+                    <RowDefinition Height="20*"/>
+                    <RowDefinition Height="30*"/>
                     <RowDefinition Height="30*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <lvc:CartesianChart
+                <StackLayout Grid.Row="0"/>
+                <StackLayout
+                      Grid.Row="1"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource LightPrimaryColor}, Dark={StaticResource DarkPrimaryColor}}">
+                    <lvc:CartesianChart
                             Series="{Binding Series}"
                             HorizontalOptions="FillAndExpand"
+                            VerticalOptions="CenterAndExpand"
                             YAxes="{Binding YAxes}"
-                            XAxes="{Binding XAxes}"
-                            Grid.Row="0">
-                </lvc:CartesianChart>
-                <BoxView Style="{DynamicResource BoxView}" Grid.Row="1"/>
+                            XAxes="{Binding XAxes}">
+                    </lvc:CartesianChart>
+                </StackLayout>
                 <StackLayout
                     Grid.Row="2"
                     Spacing="16"
-                    Padding="8, 8, 8, 8"
-                    VerticalOptions="FillAndExpand"
-                     BackgroundColor="{AppThemeBinding Light={StaticResource LightSecondaryColor}, Dark={StaticResource DarkSecondaryColor}}">
-
+                    Padding="8, 8, 8, 0"
+                    VerticalOptions="FillAndExpand">
                     <Label
                             Text="{Binding TimeText}"
                             Style="{DynamicResource TextStylePrimary}"
