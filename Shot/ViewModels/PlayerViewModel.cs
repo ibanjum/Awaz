@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -11,9 +12,10 @@ using Xamarin.Forms;
 
 namespace Shot.ViewModels
 {
-    public class PlayerViewModel : ConsistentPlayerViewModel
+    public class PlayerViewModel : BaseViewModel<PlayerModel>
     {
         private readonly INavigationService _navigationService;
+        private readonly IPlayerService _playerService;
 
         public string CreationDateText => AppResources.CreationDateLabel;
         public string RecordingFormatText => AppResources.RecordingFormatLabel;
@@ -24,6 +26,22 @@ namespace Shot.ViewModels
         public string RewindImageSource => ImageNames.RewindImage;
         public string ForwardImageSource => ImageNames.ForwardImage;
         public string ExpandImageSource => ImageNames.ExpandImage;
+
+        public RecordingCellModel CurrentRecording
+        {
+            get { return GetPropertyValue<RecordingCellModel>(); }
+            set
+            {
+                SetPropertyValue(value);
+                UpdateRecording();
+            }
+        }
+
+        public ObservableCollection<RecordingCellModel> Recordings
+        {
+            get { return GetPropertyValue<ObservableCollection<RecordingCellModel>>(); }
+            set { SetPropertyValue(value); }
+        }
 
         public bool IsDragging
         {
@@ -78,6 +96,28 @@ namespace Shot.ViewModels
             set { SetPropertyValue(value); }
         }
 
+        public MediaStatus PlayingStatus
+        {
+            get { return GetPropertyValue<MediaStatus>(); }
+            set
+            {
+                SetPropertyValue(value);
+                PlayPauseImageSource = PlayingStatus == MediaStatus.Running ? ImageNames.PlayerPauseImage : ImageNames.PlayerPlayImage;
+            }
+        }
+
+        public string PlayPauseImageSource
+        {
+            get { return GetPropertyValue<string>(); }
+            set { SetPropertyValue(value); }
+        }
+
+        public int CurrentSliderPosition
+        {
+            get { return GetPropertyValue<int>(); }
+            set { SetPropertyValue(value); }
+        }
+
         public ICommand ForwardCommand => new Command(OnForwardPressed);
         public ICommand RewindCommand => new Command(OnRewindPressed);
         public ICommand DragStartedCommand => new Command(OnDragStarted);
@@ -88,17 +128,32 @@ namespace Shot.ViewModels
         public PlayerViewModel(INavigationService navigationService) : base(navigationService)
         {
             _navigationService = navigationService;
+            _playerService = DependencyService.Get<IPlayerService>();
             SliderMaximum = 1;
+            UpdateTimerData();
         }
 
-        public override void UpdateTimerData()
+        public override void Init(PlayerModel parameter)
         {
-            base.UpdateTimerData();
+            Recordings = parameter.Recordings;
+            CurrentRecording = parameter.CurrentRecording;
+            PlayingStatus = parameter.PlayingStatus;
+        }
 
-            if (PlayerService == null)
-                return;
+        private void UpdateTimerData()
+        {
+            Device.StartTimer(TimeSpan.FromMilliseconds(1), () =>
+            {
+                if (PlayingStatus == MediaStatus.Running)
+                {
+                    CurrentSliderPosition = _playerService.GetCurrentPosition();
+                    CurrentTimeText = TimeSpan.FromMilliseconds(_playerService.GetCurrentPosition()).ToString(@"hh\:mm\:ss");
+                    if (_playerService.GetMetaDataDuration(CurrentRecording?.FilePath).Equals(_playerService.GetCurrentPosition()))
+                        OnForwardPressed();
+                }
 
-            CurrentTimeText = TimeSpan.FromMilliseconds(PlayerService.GetCurrentPosition()).ToString(@"hh\:mm\:ss");
+                return true;
+            });
         }
 
         private void UpdateRecording()
@@ -114,7 +169,7 @@ namespace Shot.ViewModels
 
         private void OnRewindPressed()
         {
-            PlayerService.Pause();
+            _playerService.Pause();
             var currentIndex = Recordings.IndexOf(CurrentRecording);
             RecordingCellModel prevRecording;
 
@@ -123,9 +178,24 @@ namespace Shot.ViewModels
             else
                 prevRecording = Recordings[Recordings.Count - 1];
 
-            PlayerService.SetPlayer(prevRecording.FilePath);
+            _playerService.SetPlayer(prevRecording.FilePath);
             CurrentRecording = prevRecording;
-            PlayerService.Play();
+        }
+
+        private void OnForwardPressed()
+        {
+            _playerService.Pause();
+            _playerService.Stop();
+            var currentIndex = Recordings.IndexOf(CurrentRecording);
+            RecordingCellModel nxtRecording;
+
+            if (currentIndex + 1 < Recordings.Count)
+                nxtRecording = Recordings[currentIndex + 1];
+            else
+                nxtRecording = Recordings[0];
+
+            _playerService.SetPlayer(nxtRecording.FilePath);
+            CurrentRecording = nxtRecording;
         }
 
         private void OnDragStarted(object obj)
@@ -135,7 +205,7 @@ namespace Shot.ViewModels
 
         private void OnDragCompleted(object obj)
         {
-            PlayerService.SeekTo(CurrentSliderPosition, isRelative: false);
+            _playerService.SeekTo(CurrentSliderPosition, isRelative: false);
             IsDragging = false;
         }
 
@@ -157,12 +227,11 @@ namespace Shot.ViewModels
         private async Task OnExpandPressed()
         {
             await _navigationService.GoBackWithParam(
-                new BaseConsistentPlayerModel()
-                {
-                    CurrentRecording = CurrentRecording,
-                    PlayerService = PlayerService,
-                    Recordings = Recordings
-                });
+               new PlayerModel()
+               {
+                   Recordings = Recordings,
+                   CurrentRecording = CurrentRecording
+               });
         }
     }
 }

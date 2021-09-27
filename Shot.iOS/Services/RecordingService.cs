@@ -7,7 +7,7 @@ namespace Shot.iOS.Services
 {
     public class RecordingService : IRecordingService
     {
-        public RecordingStatus Status { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public MediaStatus Status { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public void Pause()
         {

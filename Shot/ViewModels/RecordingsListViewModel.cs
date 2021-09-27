@@ -11,12 +11,14 @@ using System.Windows.Input;
 using System.Linq;
 using System.Collections.Generic;
 using Xamarin.Essentials;
+using Shot.Enumerations;
 
 namespace Shot.ViewModels
 {
-    public class RecordingsListViewModel : ConsistentPlayerViewModel
+    public class RecordingsListViewModel : BaseViewModel, IMessageSender
     {
         private readonly INavigationService _navigationService;
+        private readonly IPlayerService _playerService;
 
         public string RecordingsListTitle => AppResources.RecordingsListTitle;
         public string SearchFieldPlaceHolderText => AppResources.SearchFieldPlaceHolderLabel;
@@ -30,9 +32,56 @@ namespace Shot.ViewModels
             set { SetPropertyValue(value); }
         }
 
+        public bool IsMediaPlayerOn
+        {
+            get { return GetPropertyValue<bool>(); }
+            set { SetPropertyValue(value); }
+        }
+
+        public RecordingCellModel CurrentRecording
+        {
+            get { return GetPropertyValue<RecordingCellModel>(); }
+            set { SetPropertyValue(value); }
+        }
+
+        public string PlayPauseImageSource
+        {
+            get { return GetPropertyValue<string>(); }
+            set { SetPropertyValue(value); }
+        }
+
+        public MediaStatus PlayingStatus
+        {
+            get { return GetPropertyValue<MediaStatus>(); }
+            set
+            {
+                SetPropertyValue(value);
+                PlayPauseImageSource = PlayingStatus == MediaStatus.Running ? ImageNames.PlayerPauseImage : ImageNames.PlayerPlayImage;
+                IsMediaPlayerOn = PlayingStatus != MediaStatus.Stopped ? true : false;
+            }
+        }
+
+        public int SliderMaximum
+        {
+            get { return GetPropertyValue<int>(); }
+            set { SetPropertyValue(value); }
+        }
+
+        public int CurrentSliderPosition
+        {
+            get { return GetPropertyValue<int>(); }
+            set { SetPropertyValue(value); }
+        }
+
         public string SeletedRecordingCountText
         {
             get { return GetPropertyValue<string>(); }
+            set { SetPropertyValue(value); }
+        }
+
+        public ObservableCollection<RecordingCellModel> Recordings
+        {
+            get { return GetPropertyValue<ObservableCollection<RecordingCellModel>>(); }
             set { SetPropertyValue(value); }
         }
 
@@ -59,17 +108,22 @@ namespace Shot.ViewModels
         public ICommand ShareSelectedRecordingsCommand => new Command(OnDeleteSelectedRecordinsPressed);
         public ICommand DeleteSelectedRecordingsCommand => new Command(OnShareSelectedRecordinsPressed);
         public ICommand RecordCommand => new Command(OnRecordPressed);
+        public ICommand PlayCommand => new Command(OnPlayPressed);
+        public ICommand PlayerBarCommmand => new Command(OnPlayerBarPressed);
 
         public RecordingsListViewModel(
             INavigationService navigationService) : base(navigationService)
         {
             _navigationService = navigationService;
+            _playerService = DependencyService.Get<IPlayerService>();
             Recordings = new ObservableCollection<RecordingCellModel>();
+            SubscribeRecordingStatus();
+            SliderMaximum = 1;
+            UpdateTimerData();
         }
 
         public override Task Init()
         {
-            PlayerService = DependencyService.Get<IPlayerService>();
             PopulateRecordings();
             IsSectionModeOn = false;
             SeletedRecordingCountText = AppResources.SelectItemsLabel;
@@ -89,7 +143,7 @@ namespace Shot.ViewModels
                     Name = FileExtension.GetEnteredName(filePath),
                     FilePath = filePath,
                     CreationTime = FileExtension.GetCreationTime(filePath),
-                    Duration = PlayerService.GetMetaDataDuration(filePath),
+                    Duration = _playerService.GetMetaDataDuration(filePath),
                     FileSize = FileExtension.GetFileSize(filePath),
                     FileFormat = FileExtension.GetFileExtension(filePath),
                     LongPressCommand = new Command(OnLongPressed),
@@ -194,10 +248,11 @@ namespace Shot.ViewModels
 
             var filePath = obj as string;
             var cell = Recordings.FirstOrDefault(cm => cm.FilePath == filePath);
+            CurrentRecording = cell;
 
             if (IsSectionModeOn)
             {
-                cell.IsSelected = !cell.IsSelected;
+                CurrentRecording.IsSelected = !CurrentRecording.IsSelected;
                 var selectedCount = Recordings.Where(cm => cm.IsSelected == true).Count();
                 IsOptionsEnabled = selectedCount > 0;
                 string selectionText;
@@ -217,11 +272,75 @@ namespace Shot.ViewModels
             }
             else
             {
-                CurrentRecording = cell;
-                PlayCommand.Execute(null);
-                //await _navigationService.NavigateTo<PlayerViewModel, RecordingCellModel>(cell);
-
+                _playerService.SetPlayer(CurrentRecording.FilePath);
+                SliderMaximum = CurrentRecording.Duration;
             }
+        }
+
+        private void OnPlayPressed()
+        {
+            switch (PlayingStatus)
+            {
+                case MediaStatus.Paused:
+                    _playerService.Play();
+                    break;
+                case MediaStatus.Running:
+                    _playerService.Pause();
+                    break;
+            }
+
+        }
+
+        private void UpdateTimerData()
+        {
+            Device.StartTimer(TimeSpan.FromMilliseconds(1), () =>
+            {
+                if (PlayingStatus == MediaStatus.Running)
+                {
+                    CurrentSliderPosition = _playerService.GetCurrentPosition();
+                    if (_playerService.GetMetaDataDuration(CurrentRecording?.FilePath).Equals(_playerService.GetCurrentPosition()))
+                        OnForwardPressed();
+                }
+
+                return true;
+            });
+        }
+
+        private void SubscribeRecordingStatus()
+        {
+            MessagingCenter.Subscribe<IMessageSender, string>(this, "PS", (s, e) =>
+            {
+                PlayingStatus = (MediaStatus)Enum.Parse(typeof(MediaStatus), e);
+            });
+        }
+
+        private void OnForwardPressed()
+        {
+            _playerService.Pause();
+            _playerService.Stop();
+            var currentIndex = Recordings.IndexOf(CurrentRecording);
+            RecordingCellModel nxtRecording;
+
+            if (currentIndex + 1 < Recordings.Count)
+                nxtRecording = Recordings[currentIndex + 1];
+            else
+                nxtRecording = Recordings[0];
+
+            _playerService.SetPlayer(nxtRecording.FilePath);
+            CurrentRecording = nxtRecording;
+            SliderMaximum = CurrentRecording.Duration;
+        }
+
+        private async void OnPlayerBarPressed()
+        {
+            await _navigationService.NavigateTo<PlayerViewModel, PlayerModel>(
+                new PlayerModel()
+                {
+                    Recordings = Recordings,
+                    CurrentRecording = CurrentRecording,
+                    PlayingStatus = PlayingStatus
+                },
+                isModel: true);
         }
     }
 }

@@ -70,14 +70,14 @@ namespace Shot.ViewModels
             set { SetPropertyValue(value); }
         }
 
-        public RecordingStatus RecordingStatus
+        public MediaStatus RecordingStatus
         {
-            get { return GetPropertyValue<RecordingStatus>(); }
+            get { return GetPropertyValue<MediaStatus>(); }
             set
             {
                 SetPropertyValue(value);
-                IsDoneCommandEnabled = RecordingStatus != RecordingStatus.Stopped;
-                RecordPauseImageSource = RecordingStatus == RecordingStatus.Running ? ImageNames.PlayerPauseImage : ImageNames.RecordImage;
+                IsDoneCommandEnabled = RecordingStatus != MediaStatus.Stopped;
+                RecordPauseImageSource = RecordingStatus == MediaStatus.Running ? ImageNames.PlayerPauseImage : ImageNames.RecordImage;
             }
         }
 
@@ -113,7 +113,7 @@ namespace Shot.ViewModels
 
             _stopwatch = new Stopwatch();
             isMediaRecorderOn = true;
-            RecordingStatus = RecordingStatus.Stopped;
+            RecordingStatus = MediaStatus.Stopped;
             SetRecordingTimer();
         }
 
@@ -121,15 +121,15 @@ namespace Shot.ViewModels
         {
             switch (RecordingStatus)
             {
-                case RecordingStatus.Running:
+                case MediaStatus.Running:
                     _recordingService.Pause();
                     _stopwatch.Stop();
                     break;
-                case RecordingStatus.Paused:
+                case MediaStatus.Paused:
                     _recordingService.Resume();
                     _stopwatch.Start();
                     break;
-                case RecordingStatus.Stopped:
+                case MediaStatus.Stopped:
                     var popupModel = new PopupModel(AppResources.SaveRecordingLabel, AppResources.EnterNameLabel, AppResources.SaveLabel);
                     var fileName = await _navigationService.DisplayPrompt(popupModel);
                     if (!string.IsNullOrEmpty(fileName))
@@ -163,7 +163,7 @@ namespace Shot.ViewModels
                 if (isMediaRecorderOn)
                 {
                     TimeText = _stopwatch.Elapsed.ToString(@"hh\:mm\:ss");
-                    if (RecordingStatus != RecordingStatus.Paused)
+                    if (RecordingStatus != MediaStatus.Paused)
                     {
                         var amplitude = _recordingService.MaxAmplitude;
                         if (amplitude != null)
@@ -200,7 +200,7 @@ namespace Shot.ViewModels
         {
             MessagingCenter.Subscribe<IMessageSender, string>(this, "RS", (s, e) =>
             {
-                RecordingStatus = (RecordingStatus)Enum.Parse(typeof(RecordingStatus), e);
+                RecordingStatus = (MediaStatus)Enum.Parse(typeof(MediaStatus), e);
             });
         }
     }

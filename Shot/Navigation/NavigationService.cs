@@ -31,9 +31,9 @@ namespace Shot.Navigation
             }
         }
 
-        public async Task NavigateTo<TVM>() where TVM : BaseViewModel
+        public async Task NavigateTo<TVM>(bool isModel = false) where TVM : BaseViewModel
         {
-            await NavigateToView(typeof(TVM));
+            await NavigateToView(typeof(TVM), isModel);
 
             if (navigationRoot.NavigationStack.Last().BindingContext is BaseViewModel)
             {
@@ -41,9 +41,9 @@ namespace Shot.Navigation
             }
         }
 
-        public async Task NavigateTo<TVM, TParameter>(TParameter parameter) where TVM : BaseViewModel
+        public async Task NavigateTo<TVM, TParameter>(TParameter parameter, bool isModel = false) where TVM : BaseViewModel
         {
-            await NavigateToView(typeof(TVM));
+            await NavigateToView(typeof(TVM), isModel);
 
             if (navigationRoot.NavigationStack
                 .Last().BindingContext is BaseViewModel<TParameter>)
@@ -99,7 +99,7 @@ namespace Shot.Navigation
             }
         }
 
-        private async Task NavigateToView(Type viewModelType)
+        private async Task NavigateToView(Type viewModelType, bool isModel = false)
         {
             Type viewType;
 
@@ -116,7 +116,10 @@ namespace Shot.Navigation
             var vm = ((App)Application.Current).Kernel.Get(viewModelType);
             view.BindingContext = vm;
 
-            await navigationRoot.PushModalAsync(view, true);
+            if (isModel)
+                await navigationRoot.PushAsync(view, true);
+            else
+                await navigationRoot.PushModalAsync(view, true);
         }
 
         public async Task DisplayPopup(PopupModel popup)
@@ -155,11 +158,9 @@ namespace Shot.Navigation
 
         Task<string> DisplayPrompt(PopupModel popup);
 
-        Task NavigateTo<TVM>()
-             where TVM : BaseViewModel;
+        Task NavigateTo<TVM>(bool isModel = false) where TVM : BaseViewModel;
 
-        Task NavigateTo<TVM, TParameter>(TParameter parameter)
-           where TVM : BaseViewModel;
+        Task NavigateTo<TVM, TParameter>(TParameter parameter, bool isModel = false) where TVM : BaseViewModel;
 
         void RemoveLastView();
 

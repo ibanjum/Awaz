@@ -37,7 +37,7 @@ namespace Shot.Droid.Services
             _recorder.Prepare();
             _recorder.Start();
 
-            MessagingCenter.Send<IMessageSender, string>(this, "RS", RecordingStatus.Running.ToString());
+            MessagingCenter.Send<IMessageSender, string>(this, "RS", MediaStatus.Running.ToString());
 
             return StartCommandResult.NotSticky;
         }
@@ -54,7 +54,7 @@ namespace Shot.Droid.Services
             _recorder.Stop();
             _recorder.Release();
             _recorder = null;
-            MessagingCenter.Send<IMessageSender, string>(this, "RS", RecordingStatus.Stopped.ToString());
+            MessagingCenter.Send<IMessageSender, string>(this, "RS", MediaStatus.Stopped.ToString());
             // var notificationManager = (NotificationManager)GetSystemService(NotificationService);
             //notificationManager.Cancel(NOTIFICATION_ID);
             base.OnDestroy();
@@ -71,7 +71,7 @@ namespace Shot.Droid.Services
                 return;
 
             _recorder.Pause();
-            MessagingCenter.Send<IMessageSender, string>(this, "RS", RecordingStatus.Paused.ToString());
+            MessagingCenter.Send<IMessageSender, string>(this, "RS", MediaStatus.Paused.ToString());
         }
 
         public void Resume()
@@ -80,7 +80,7 @@ namespace Shot.Droid.Services
                 return;
 
             _recorder.Resume();
-            MessagingCenter.Send<IMessageSender, string>(this, "RS", RecordingStatus.Running.ToString());
+            MessagingCenter.Send<IMessageSender, string>(this, "RS", MediaStatus.Running.ToString());
         }
 
         public void Start(string fileNameForRecording)

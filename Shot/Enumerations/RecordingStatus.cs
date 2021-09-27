@@ -1,6 +1,6 @@
 ﻿namespace Shot.Enumerations
 {
-    public enum RecordingStatus
+    public enum MediaStatus
     {
         Stopped,
         Running,

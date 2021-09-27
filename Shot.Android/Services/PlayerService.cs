@@ -1,13 +1,10 @@
-﻿using System;
-using System.Linq;
-using Android.App;
+﻿using Android.App;
 using Android.Content;
 using Android.Media;
 using Android.OS;
+using Android.Runtime;
 using Shot.Enumerations;
-using Shot.Extensions;
 using Shot.Services;
-using Shot.ViewModels;
 using Xamarin.Forms;
 
 [assembly: Dependency(typeof(Shot.Droid.Services.PlayerService))]
@@ -16,64 +13,72 @@ namespace Shot.Droid.Services
     [Service(Exported = true)]
     public class PlayerService : Service, IPlayerService, IMessageSender
     {
-        MediaPlayer Player;
+        static MediaPlayer _player;
         MediaMetadataRetriever _mmr;
-        private ConsistentPlayerViewModel _vm => Xamarin.Forms.Application.Current.MainPage.Navigation.NavigationStack.Last().BindingContext as ConsistentPlayerViewModel;
-        public RecordingStatus Status { get; set; }
-        public string FilePath { get; set; }
+        static string _filePath;
+        static private Intent _playerService;
 
         public void Pause()
         {
-            if (Player == null)
+            if (_player == null)
                 return;
 
-            Player.Pause();
-            Status = RecordingStatus.Paused;
+            _player.Pause();
+            MessagingCenter.Send<IMessageSender, string>(this, "PS", MediaStatus.Paused.ToString());
         }
 
         public void Play()
         {
-            if (Player == null)
+            if (_player == null)
                 return;
 
-            Player.Start();
+            _player.Start();
+            MessagingCenter.Send<IMessageSender, string>(this, "PS", MediaStatus.Running.ToString());
         }
 
         public void SeekTo(int msec, bool isRelative)
         {
-            if (Player == null)
+            if (_player == null)
                 return;
 
             if (isRelative)
             {
-                var newPosition = Player.CurrentPosition + msec;
-                Player.SeekTo(newPosition);
+                var newPosition = _player.CurrentPosition + msec;
+                _player.SeekTo(newPosition);
             }
             else
             {
-                Player.SeekTo(msec);
+                _player.SeekTo(msec);
             }
         }
 
         public int GetCurrentPosition()
         {
-            if (Player == null)
+            if (_player == null)
                 return 0;
 
-            return Player.CurrentPosition;
+            return _player.CurrentPosition;
         }
 
         public void SetPlayer(string filePath)
         {
-            FilePath = filePath;
-            Player = new MediaPlayer();
-            Player.SetDataSource(FilePath);
-            Player.Prepare();
+            if (string.IsNullOrEmpty(filePath))
+                return;
 
-            Status = RecordingStatus.Running;
-            HandleConsistentPlayer();
-            SetTimer();
-            MessagingCenter.Send<IMessageSender, string>(this, "CPI", filePath);
+            _filePath = filePath;
+            _playerService = new Intent(MainActivity.Context, typeof(PlayerService));
+            MainActivity.Context.StartService(_playerService);
+        }
+
+        [return: GeneratedEnum]
+        public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
+        {
+            _player = new MediaPlayer();
+            _player.SetDataSource(_filePath);
+            _player.Prepare();
+            Play();
+
+            return StartCommandResult.NotSticky;
         }
 
         public int GetMetaDataDuration(string filePath)
@@ -92,41 +97,16 @@ namespace Shot.Droid.Services
             return null;
         }
 
-        private void HandleConsistentPlayer()
+        public void Stop()
         {
-            MessagingCenter.Subscribe<IMessageSender, string>(this, "PlayPause", (e, args) =>
-            {
-                bool.TryParse(args, out var isPlaying);
-                if (isPlaying)
-                {
-                    Pause();
-                }
-                else
-                {
-                    Play();
-                    SetTimer();
-                }
-            });
+            MainActivity.Context.StopService(_playerService);
         }
 
-        private void SetTimer()
+        public override void OnDestroy()
         {
-            Device.StartTimer(TimeSpan.FromMilliseconds(1), () =>
-            {
-                if (typeof(PlayerViewModel) != _vm.GetType() && Status == RecordingStatus.Running)
-                {
-                    MessagingCenter.Send<IMessageSender, string>(this, "PT", GetCurrentPosition().ToString());
-                    if (GetMetaDataDuration(FilePath).Equals(GetCurrentPosition()))
-                    {
-                        MessagingCenter.Send<IMessageSender>(this, "NextRecording");
-                    }
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            });
+            _player.Stop();
+            base.OnDestroy();
+
         }
     }
 }
